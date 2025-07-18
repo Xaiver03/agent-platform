@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Space, message, Tooltip } from 'antd'
+import { Button, Space, message, Tooltip, Typography } from 'antd'
+
+const { Title } = Typography
 import { 
   MessageOutlined, 
   FormOutlined, 
@@ -79,24 +81,64 @@ export function FeedbackButtons() {
   }
 
   return (
-    <Space size="large" style={{ marginTop: 32 }}>
-      {buttons.map((button, index) => (
-        <Tooltip key={button.id} title={button.description}>
-          <Button
-            type={index === 0 ? 'primary' : 'default'}
-            size="large"
-            icon={getIcon(button.icon)}
-            onClick={() => handleButtonClick(button)}
-            style={{
-              backgroundColor: index === 0 ? button.color : undefined,
-              borderColor: index === 0 ? button.color : button.color,
-              color: index === 0 ? '#fff' : button.color
-            }}
-          >
-            {button.title}
-          </Button>
-        </Tooltip>
-      ))}
-    </Space>
+    <div style={{ 
+      marginTop: 60,
+      padding: '40px 20px',
+      textAlign: 'center'
+    }}>
+      <Title 
+        level={3} 
+        style={{ 
+          color: 'white', 
+          marginBottom: 32,
+          textShadow: '0 0 15px rgba(255, 255, 255, 0.5)'
+        }}
+      >
+        ✨ 银河系反馈中心
+      </Title>
+      
+      <Space size="large" wrap>
+        {buttons.map((button, index) => (
+          <Tooltip key={button.id} title={button.description}>
+            <Button
+              type={index === 0 ? 'primary' : 'default'}
+              size="large"
+              icon={getIcon(button.icon)}
+              onClick={() => handleButtonClick(button)}
+              style={{
+                background: index === 0 
+                  ? `linear-gradient(135deg, ${button.color}80, ${button.color}40)`
+                  : 'rgba(255, 255, 255, 0.1)',
+                border: `1px solid ${index === 0 ? button.color + '60' : 'rgba(255, 255, 255, 0.3)'}`,
+                color: 'white',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '12px',
+                height: '48px',
+                padding: '0 24px',
+                fontWeight: 500,
+                boxShadow: index === 0 
+                  ? `0 8px 25px ${button.color}40`
+                  : '0 8px 25px rgba(0, 0, 0, 0.3)',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.boxShadow = index === 0 
+                  ? `0 12px 35px ${button.color}60`
+                  : '0 12px 35px rgba(255, 255, 255, 0.2)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = index === 0 
+                  ? `0 8px 25px ${button.color}40`
+                  : '0 8px 25px rgba(0, 0, 0, 0.3)'
+              }}
+            >
+              {button.title}
+            </Button>
+          </Tooltip>
+        ))}
+      </Space>
+    </div>
   )
 }
