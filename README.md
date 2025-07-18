@@ -253,17 +253,28 @@ NEXTAUTH_SECRET="your-secret-key"
 
 MIT License - 可自由使用和修改
 
-## 💡 项目说明
+## 📚 文档中心
 
-### 关于AEXD目录
+完整的项目文档请查看：**[docs/](docs/README.md)**
+
+### 📖 快速导航
+- [📥 安装指南](docs/installation.md) - 详细安装步骤
+- [🛠️ 开发指南](docs/DEVELOPMENT.md) - 开发工作流和版本管理  
+- [🔌 API文档](docs/api.md) - 接口说明和使用示例
+- [❓ 常见问题](docs/faq.md) - 问题排查和解决方案
+- [📋 更新日志](docs/CHANGELOG.md) - 版本历史和变更记录
+
+### 💡 项目说明
+
+#### 关于AEXD目录
 AEXD（AI Experience Design）是整个项目的根目录，包含：
 - **AI Agent 体验台总览页面设计.md** - 页面设计规范文档
 - **AI Agent 体验台系统 PRD文档.md** - 详细的产品需求文档
 - **ai-agent-platform/** - 实际的代码实现
 - **triody-clone/** - 另一个独立的演示项目
 
-### 开发建议
-1. **先阅读文档**：建议先阅读PRD文档了解业务需求
+#### 开发建议
+1. **先阅读文档**：建议先阅读 [docs/](docs/README.md) 了解完整信息
 2. **数据已初始化**：数据库已包含示例数据，可直接预览
 3. **图片上传**：支持本地上传，存储在`public/uploads/`
 4. **扩展性**：代码结构清晰，易于添加新功能
