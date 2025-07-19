@@ -10,13 +10,15 @@ interface RichTextEditorProps {
   onChange?: (value: string) => void
   placeholder?: string
   style?: React.CSSProperties
+  height?: number
 }
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
   placeholder = "请输入内容...",
-  style
+  style,
+  height = 200
 }) => {
   return (
     <TextArea
@@ -24,7 +26,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       onChange={(e) => onChange?.(e.target.value)}
       placeholder={placeholder}
       rows={8}
-      style={{ minHeight: 300, ...style }}
+      style={{ minHeight: height, ...style }}
     />
   )
 }

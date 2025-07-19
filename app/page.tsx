@@ -20,6 +20,11 @@ const FeedbackButtons = dynamic(() => import('@/components/FeedbackButtons').the
   ssr: false
 })
 
+const Danmaku = dynamic(() => import('@/components/Danmaku').then(mod => ({ default: mod.Danmaku })), {
+  loading: () => null,
+  ssr: false
+})
+
 interface Agent {
   id: string
   name: string
@@ -40,6 +45,8 @@ export default function Galaxy3DPage() {
   const [filteredAgents, setFilteredAgents] = useState<Agent[]>([])
   const [allTags, setAllTags] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [danmakuInputVisible, setDanmakuInputVisible] = useState(false)
+  const [danmakuPlaying, setDanmakuPlaying] = useState(false)
 
   useEffect(() => {
     fetchAgents()
@@ -237,6 +244,79 @@ export default function Galaxy3DPage() {
         <div style={{ marginTop: '8px', fontSize: '12px', opacity: 0.7 }}>
           ⭐ {filteredAgents.length} 颗AI星星
         </div>
+        
+        {/* 弹幕控制区域 */}
+        <div style={{ 
+          marginTop: '12px', 
+          paddingTop: '12px', 
+          borderTop: '1px solid rgba(255, 255, 255, 0.2)' 
+        }}>
+          <div style={{ marginBottom: '8px', fontSize: '12px', fontWeight: 'bold' }}>
+            💬 弹幕系统
+          </div>
+          <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+            <button
+              onClick={() => setDanmakuInputVisible(!danmakuInputVisible)}
+              style={{
+                flex: 1,
+                padding: '6px 8px',
+                background: danmakuInputVisible 
+                  ? 'rgba(255, 255, 255, 0.2)' 
+                  : 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '6px',
+                color: 'white',
+                fontSize: '11px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                textShadow: '0 0 10px rgba(255, 255, 255, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = danmakuInputVisible 
+                  ? 'rgba(255, 255, 255, 0.2)' 
+                  : 'rgba(255, 255, 255, 0.1)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              {danmakuInputVisible ? '关闭输入' : '发送弹幕'}
+            </button>
+            <button
+              onClick={() => setDanmakuPlaying(!danmakuPlaying)}
+              style={{
+                flex: 1,
+                padding: '6px 8px',
+                background: danmakuPlaying 
+                  ? 'rgba(255, 255, 255, 0.2)' 
+                  : 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '6px',
+                color: 'white',
+                fontSize: '11px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                textShadow: '0 0 10px rgba(255, 255, 255, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'
+                e.currentTarget.style.transform = 'translateY(-1px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = danmakuPlaying 
+                  ? 'rgba(255, 255, 255, 0.2)' 
+                  : 'rgba(255, 255, 255, 0.1)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              {danmakuPlaying ? '停止播放' : '播放弹幕'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* 反馈按钮 */}
@@ -250,6 +330,36 @@ export default function Galaxy3DPage() {
         <FeedbackButtons />
       </div>
 
+      {/* 作者信息 */}
+      <div style={{
+        position: 'fixed',
+        bottom: '20px',
+        left: '20px',
+        color: 'rgba(255, 255, 255, 0.7)',
+        fontSize: '12px',
+        zIndex: 100,
+        textShadow: '0 0 10px rgba(255, 255, 255, 0.3)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2px'
+      }}>
+        <div style={{ 
+          fontWeight: 'bold',
+          background: 'linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          创新活动产品组
+        </div>
+        <div style={{ 
+          fontSize: '11px',
+          opacity: 0.8
+        }}>
+          Made by Xaiver / 邓湘雷
+        </div>
+      </div>
+
       {/* 底部版权信息 */}
       <div style={{
         position: 'fixed',
@@ -261,6 +371,15 @@ export default function Galaxy3DPage() {
       }}>
         ⭐ MiraclePlus AI Galaxy Star System
       </div>
+
+      {/* 弹幕系统 */}
+      <Danmaku 
+        enabled={true} 
+        showInput={danmakuInputVisible}
+        isPlaying={danmakuPlaying}
+        onShowInputChange={setDanmakuInputVisible}
+        onPlayingChange={setDanmakuPlaying}
+      />
     </div>
   )
 }

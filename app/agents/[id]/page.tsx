@@ -195,7 +195,7 @@ const FeedbackCard = ({ feedback }: { feedback: any }) => {
             )}
           </div>
           <div style={{ textAlign: 'right' }}>
-            <Rate disabled defaultValue={feedback.score} size="small" />
+            <Rate disabled defaultValue={feedback.score} />
             <div>
               <Text type="secondary" style={{ fontSize: 12 }}>
                 {new Date(feedback.createdAt).toLocaleDateString()}
@@ -294,13 +294,46 @@ export default function AgentDetailPage() {
     : 'N/A'
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* Back Button */}
-      <Space style={{ marginBottom: 24 }}>
-        <Link href="/" legacyBehavior>
-          <Button type="text" icon={<ArrowLeftOutlined />}>返回工具列表</Button>
-        </Link>
-      </Space>
+    <div style={{ position: 'relative', padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Frosted Glass Back Button - Left Top Corner */}
+      <Link href="/" legacyBehavior>
+        <button
+          style={{
+            position: 'fixed',
+            top: '20px',
+            left: '20px',
+            width: '48px',
+            height: '48px',
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '12px',
+            cursor: 'pointer',
+            zIndex: 1000,
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'rgba(0, 0, 0, 0.7)',
+            fontSize: '18px',
+            fontWeight: 'bold'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'
+            e.currentTarget.style.transform = 'scale(1.05)'
+            e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.15)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)'
+          }}
+          title="返回首页"
+        >
+          ←
+        </button>
+      </Link>
 
       {/* Header */}
       <Card style={{ marginBottom: 24 }}>

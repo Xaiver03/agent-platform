@@ -18,18 +18,19 @@ interface Agent {
 
 interface GalaxyStarSystemProps {
   agents: Agent[]
+  onPlanetHover?: (agent: Agent) => void
 }
 
-// 根据标签获取星星颜色
+// 根据标签获取星星颜色 - 彩虹色系
 const getStarColor = (tags: string): string => {
   const tagLower = tags.toLowerCase()
-  if (tagLower.includes('编程') || tagLower.includes('代码')) return '#50C878'
-  if (tagLower.includes('设计') || tagLower.includes('图像')) return '#FF6B6B'
-  if (tagLower.includes('写作') || tagLower.includes('文档')) return '#4ECDC4'
-  if (tagLower.includes('搜索') || tagLower.includes('研究')) return '#45B7D1'
-  if (tagLower.includes('对话') || tagLower.includes('助手')) return '#BD10E0'
-  if (tagLower.includes('分析') || tagLower.includes('数据')) return '#B8E986'
-  return '#FFFFFF'
+  if (tagLower.includes('编程') || tagLower.includes('代码')) return '#FF0000' // 红色
+  if (tagLower.includes('设计') || tagLower.includes('图像')) return '#FF7F00' // 橙色
+  if (tagLower.includes('写作') || tagLower.includes('文档')) return '#FFFF00' // 黄色
+  if (tagLower.includes('搜索') || tagLower.includes('研究')) return '#00FF00' // 绿色
+  if (tagLower.includes('对话') || tagLower.includes('助手')) return '#0000FF' // 蓝色
+  if (tagLower.includes('分析') || tagLower.includes('数据')) return '#4B0082' // 靛色
+  return '#9400D3' // 紫色（默认）
 }
 
 // 根据点击次数计算星等
@@ -44,7 +45,8 @@ const getStarMagnitude = (clickCount: number = 0) => {
 }
 
 const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
-  agents
+  agents,
+  onPlanetHover
 }) => {
   // 3D控制状态
   const [rotateX, setRotateX] = useState(-20)
@@ -139,30 +141,21 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
     setAgentStars(stars)
   }, [agents, windowSize])
 
-  // 卡片显示控制
+  // 卡片显示控制 - 精确的3秒计时
   useEffect(() => {
-    let timer: NodeJS.Timeout
+    let timer: NodeJS.Timeout | undefined
     
-    if (hoveredAgent && !cardHovered) {
-      // 悬停星星时显示卡片并暂停星星运动
+    if (hoveredAgent) {
+      // 悬停星星时立即显示卡片并暂停星星运动
       setCardVisible(hoveredAgent.id)
       setPausedStars(prev => new Set(prev).add(hoveredAgent.id))
       
-      // 3秒后自动隐藏（如果没有悬停卡片）
-      timer = setTimeout(() => {
-        if (!cardHovered) {
-          setCardVisible(null)
-          setPausedStars(prev => {
-            const newSet = new Set(prev)
-            newSet.delete(hoveredAgent.id)
-            return newSet
-          })
-        }
-      }, 3000)
+      // 清除之前的计时器
+      if (timer) clearTimeout(timer)
     } else if (!hoveredAgent && !cardHovered && cardVisible) {
-      // 离开星星但没有悬停卡片时，3秒后隐藏
+      // 离开星星且没有悬停卡片时，立即启动3秒倒计时
       timer = setTimeout(() => {
-        if (!cardHovered) {
+        if (!hoveredAgent && !cardHovered) {
           setCardVisible(null)
           setPausedStars(prev => {
             const newSet = new Set(prev)
@@ -177,6 +170,29 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
       if (timer) clearTimeout(timer)
     }
   }, [hoveredAgent, cardHovered, cardVisible])
+
+  // 卡片悬停状态变化处理
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    
+    if (!cardHovered && !hoveredAgent && cardVisible) {
+      // 既没有悬停星星也没有悬停卡片时，启动3秒倒计时
+      timer = setTimeout(() => {
+        if (!cardHovered && !hoveredAgent) {
+          setCardVisible(null)
+          setPausedStars(prev => {
+            const newSet = new Set(prev)
+            newSet.delete(cardVisible)
+            return newSet
+          })
+        }
+      }, 3000)
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer)
+    }
+  }, [cardHovered, hoveredAgent, cardVisible])
 
   // 物理运动和碰撞检测
   useEffect(() => {
@@ -297,6 +313,9 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
             
             // 底部反馈按钮区域
             { x: windowSize.width / 2 - 100, y: windowSize.height - 100, width: 200, height: 60, type: 'button' },
+            
+            // 左下角作者信息区域
+            { x: 20, y: windowSize.height - 60, width: 180, height: 40, type: 'text' },
             
             // 底部版权信息文字
             { x: windowSize.width - 300, y: windowSize.height - 30, width: 280, height: 20, type: 'text' },
@@ -565,20 +584,7 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
                     pointerEvents: 'auto'
                   }}
                   onMouseEnter={() => setCardHovered(true)}
-                  onMouseLeave={() => {
-                    setCardHovered(false)
-                    // 离开卡片后3秒自动消失
-                    setTimeout(() => {
-                      if (!cardHovered) {
-                        setCardVisible(null)
-                        setPausedStars(prev => {
-                          const newSet = new Set(prev)
-                          newSet.delete(star.agent.id)
-                          return newSet
-                        })
-                      }
-                    }, 3000)
-                  }}
+                  onMouseLeave={() => setCardHovered(false)}
                 >
                   {/* 卡片头部 */}
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>

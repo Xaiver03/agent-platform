@@ -136,3 +136,26 @@ model StarMagnitudeConfig {
   @@index([isEnabled])
   @@map("star_magnitude_configs")
 }
+
+model Danmaku {
+  id        String   @id @default(cuid())
+  text      String
+  color     String   @default("#FFFFFF")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("danmakus")
+}
+
+model DanmakuConfig {
+  id        String   @id @default(cuid())
+  enabled   Boolean  @default(true)
+  maxLength Int      @default(20)
+  playSpeed Float    @default(1.0)
+  batchSize Int      @default(10)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("danmaku_config")
+}

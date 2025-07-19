@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
-import { cookies } from 'next/headers'
+import { getAdminFromToken } from '@/lib/auth'
 
 const prisma = new PrismaClient()
 
@@ -9,10 +9,9 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies()
-    const adminAuth = cookieStore.get('admin-auth')
+    const admin = await getAdminFromToken(request)
     
-    if (!adminAuth || adminAuth.value !== 'true') {
+    if (!admin) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -30,8 +29,8 @@ export async function PUT(
         url,
         icon,
         color,
-        order,
-        enabled
+        order: parseInt(order) || 0,
+        enabled: Boolean(enabled)
       }
     })
 
@@ -50,10 +49,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = cookies()
-    const adminAuth = cookieStore.get('admin-auth')
+    const admin = await getAdminFromToken(request)
     
-    if (!adminAuth || adminAuth.value !== 'true') {
+    if (!admin) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

@@ -210,15 +210,25 @@ export default function AdminDashboard() {
       const url = editingButton ? `/api/feedback-buttons/${editingButton.id}` : '/api/feedback-buttons'
       const method = editingButton ? 'PUT' : 'POST'
 
+      // 确保order字段是数字类型
+      const submitData = {
+        ...values,
+        order: parseInt(values.order) || 0
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(submitData),
       })
 
-      if (!response.ok) throw new Error('操作失败')
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('API Error:', errorData)
+        throw new Error(errorData.error || '操作失败')
+      }
 
       message.success(editingButton ? '更新成功' : '创建成功')
       setButtonModalVisible(false)
@@ -226,7 +236,8 @@ export default function AdminDashboard() {
       setEditingButton(null)
       fetchFeedbackButtons()
     } catch (error) {
-      message.error('操作失败')
+      console.error('Button submit error:', error)
+      message.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 
@@ -623,6 +634,11 @@ export default function AdminDashboard() {
                 管理员管理
               </Button>
             </Link>
+            <Link href="/admin/danmaku">
+              <Button type="default" icon={<MessageOutlined />}>
+                弹幕管理
+              </Button>
+            </Link>
           </Space>
           <Space>
             <Button
@@ -944,6 +960,7 @@ export default function AdminDashboard() {
             form={buttonForm}
             layout="vertical"
             onFinish={handleButtonSubmit}
+            className="admin-form-custom"
           >
             <Form.Item
               label="按钮标题"

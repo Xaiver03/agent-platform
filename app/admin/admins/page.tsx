@@ -328,6 +328,7 @@ export default function AdminsPage() {
           form={form}
           layout="vertical"
           onFinish={editingAdmin ? handleUpdate : handleCreate}
+          className="admin-form-custom"
         >
           <Form.Item
             name="email"
@@ -337,7 +338,7 @@ export default function AdminsPage() {
               { type: 'email', message: '请输入有效的邮箱地址' }
             ]}
           >
-            <Input style={{ color: '#000' }} />
+            <Input />
           </Form.Item>
 
           <Form.Item
@@ -345,7 +346,7 @@ export default function AdminsPage() {
             label="姓名"
             rules={[{ required: true, message: '请输入姓名' }]}
           >
-            <Input style={{ color: '#000' }} />
+            <Input />
           </Form.Item>
 
           {!editingAdmin && (
@@ -354,7 +355,7 @@ export default function AdminsPage() {
               label="密码"
               rules={[{ required: true, message: '请输入密码' }]}
             >
-              <Input.Password style={{ color: '#000' }} />
+              <Input.Password />
             </Form.Item>
           )}
 
@@ -363,13 +364,10 @@ export default function AdminsPage() {
             label="角色"
             initialValue="admin"
           >
-            <Select 
-              style={{ color: '#000' }}
-              dropdownStyle={{ color: '#000' }}
-            >
-              <Select.Option value="admin" style={{ color: '#000' }}>管理员</Select.Option>
+            <Select>
+              <Select.Option value="admin">管理员</Select.Option>
               {currentAdmin?.role === 'super_admin' && (
-                <Select.Option value="super_admin" style={{ color: '#000' }}>超级管理员</Select.Option>
+                <Select.Option value="super_admin">超级管理员</Select.Option>
               )}
             </Select>
           </Form.Item>
@@ -420,13 +418,14 @@ export default function AdminsPage() {
           form={passwordForm}
           layout="vertical"
           onFinish={handleChangePassword}
+          className="admin-form-custom"
         >
           <Form.Item
             name="password"
             label="新密码"
             rules={[{ required: true, message: '请输入新密码' }]}
           >
-            <Input.Password style={{ color: '#000' }} />
+            <Input.Password />
           </Form.Item>
 
           <Form.Item
@@ -445,7 +444,7 @@ export default function AdminsPage() {
               })
             ]}
           >
-            <Input.Password style={{ color: '#000' }} />
+            <Input.Password />
           </Form.Item>
 
           <Form.Item>
@@ -460,6 +459,65 @@ export default function AdminsPage() {
           </Form.Item>
         </Form>
       </Modal>
+
+      {/* 样式修复 */}
+      <style jsx global>{`
+        /* 修复所有表单组件的样式 */
+        .admin-form-custom .ant-input,
+        .admin-form-custom .ant-input-textarea,
+        .admin-form-custom .ant-select-selector,
+        .admin-form-custom .ant-input-affix-wrapper,
+        .admin-form-custom .ant-input-password {
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border: 2px solid #000000 !important;
+          border-radius: 4px !important;
+          font-weight: 500 !important;
+        }
+        
+        .admin-form-custom .ant-input::placeholder,
+        .admin-form-custom .ant-input-textarea::placeholder,
+        .admin-form-custom .ant-input-password::placeholder {
+          color: #666666 !important;
+        }
+        
+        .admin-form-custom .ant-input:focus,
+        .admin-form-custom .ant-input-textarea:focus,
+        .admin-form-custom .ant-input-password:focus,
+        .admin-form-custom .ant-select-focused .ant-select-selector {
+          border-color: #000000 !important;
+          box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .admin-form-custom .ant-form-item-label > label {
+          color: #000000 !important;
+          font-weight: 600 !important;
+        }
+        
+        .admin-form-custom .ant-select-selection-item {
+          color: #000000 !important;
+        }
+        
+        .ant-select-dropdown .ant-select-item-option-content {
+          color: #000 !important;
+        }
+        
+        /* 添加表格边框 */
+        .ant-table-thead > tr > th,
+        .ant-table-tbody > tr > td {
+          border: 1px solid #d9d9d9 !important;
+        }
+        
+        .ant-table-thead > tr > th {
+          background-color: #fafafa !important;
+        }
+        
+        /* 确保表格边框完整 */
+        .ant-table-container {
+          border: 1px solid #d9d9d9;
+          border-radius: 6px;
+        }
+      `}</style>
     </div>
   )
 }
