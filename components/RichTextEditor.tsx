@@ -1,0 +1,32 @@
+'use client'
+
+import React from 'react'
+import { Input } from 'antd'
+
+const { TextArea } = Input
+
+interface RichTextEditorProps {
+  value?: string
+  onChange?: (value: string) => void
+  placeholder?: string
+  style?: React.CSSProperties
+}
+
+export const RichTextEditor: React.FC<RichTextEditorProps> = ({
+  value,
+  onChange,
+  placeholder = "请输入内容...",
+  style
+}) => {
+  return (
+    <TextArea
+      value={value}
+      onChange={(e) => onChange?.(e.target.value)}
+      placeholder={placeholder}
+      rows={8}
+      style={{ minHeight: 300, ...style }}
+    />
+  )
+}
+
+export default RichTextEditor

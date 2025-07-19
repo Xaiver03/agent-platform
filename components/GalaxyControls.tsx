@@ -122,11 +122,6 @@ export const GalaxyControls: React.FC<GalaxyControlsProps> = ({
               color: 'white',
               backdropFilter: 'blur(10px)',
             },
-            button: {
-              background: 'rgba(255, 255, 255, 0.15)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              color: 'white',
-            }
           }}
         />
         

@@ -47,20 +47,23 @@ export async function PUT(
 ) {
   try {
     const body = await request.json()
-    const { name, description, tags, manager, guideUrl, homepage, icon, enabled } = body
+    const { name, description, tags, manager, guideUrl, homepage, icon, enabled, themeColor } = body
+
+    // 构建更新数据，只包含提供的字段
+    const updateData: any = {}
+    if (name !== undefined) updateData.name = name
+    if (description !== undefined) updateData.description = description
+    if (tags !== undefined) updateData.tags = tags
+    if (manager !== undefined) updateData.manager = manager
+    if (guideUrl !== undefined) updateData.guideUrl = guideUrl
+    if (homepage !== undefined) updateData.homepage = homepage
+    if (icon !== undefined) updateData.icon = icon
+    if (enabled !== undefined) updateData.enabled = enabled
+    if (themeColor !== undefined) updateData.themeColor = themeColor
 
     const agent = await prisma.agent.update({
       where: { id: params.id },
-      data: {
-        name,
-        description,
-        tags,
-        manager,
-        guideUrl,
-        homepage,
-        icon,
-        enabled
-      }
+      data: updateData
     })
 
     return NextResponse.json({ agent })

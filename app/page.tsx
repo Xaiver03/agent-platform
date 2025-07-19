@@ -1,11 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Spin, Empty, message } from 'antd'
-import { StarField } from '@/components/StarField'
-import { PlanetAgent } from '@/components/PlanetAgent'
-import { GalaxyControls } from '@/components/GalaxyControls'
-import { FeedbackButtons } from '@/components/FeedbackButtons'
+import dynamic from 'next/dynamic'
+
+const GalaxyStarSystem = dynamic(() => import('@/components/GalaxyStarSystem').then(mod => ({ default: mod.default })), {
+  loading: () => <div style={{ 
+    minHeight: '100vh', 
+    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    color: 'white'
+  }}>🌌 加载星系中...</div>,
+  ssr: false
+})
+
+const FeedbackButtons = dynamic(() => import('@/components/FeedbackButtons').then(mod => ({ default: mod.FeedbackButtons })), {
+  loading: () => null,
+  ssr: false
+})
 
 interface Agent {
   id: string
@@ -17,9 +30,10 @@ interface Agent {
   homepage?: string
   icon?: string
   enabled: boolean
+  clickCount?: number
 }
 
-export default function GalaxyHomePage() {
+export default function Galaxy3DPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTag, setSelectedTag] = useState<string>('all')
   const [agents, setAgents] = useState<Agent[]>([])
@@ -66,33 +80,39 @@ export default function GalaxyHomePage() {
       setAllTags(Array.from(allTagsSet))
     } catch (err) {
       console.error('Failed to load agents:', err)
-      message.error('加载AI工具失败')
     } finally {
       setLoading(false)
     }
   }
 
-  // 生成星球位置（螺旋星系布局）
-  const generatePlanetPositions = (agents: Agent[]) => {
-    const positions: Array<{ x: number; y: number }> = []
-    const centerX = typeof window !== 'undefined' ? window.innerWidth / 2 : 800
-    const centerY = typeof window !== 'undefined' ? window.innerHeight / 2 : 600
-    
-    agents.forEach((_, index) => {
-      // 螺旋星系算法
-      const angle = (index * 137.5) * (Math.PI / 180) // 黄金角度
-      const radius = Math.sqrt(index + 1) * 80 + 200
-      
-      const x = centerX + Math.cos(angle) * radius + (Math.random() - 0.5) * 100
-      const y = centerY + Math.sin(angle) * radius + (Math.random() - 0.5) * 100
-      
-      positions.push({ x, y })
-    })
-    
-    return positions
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            fontSize: '48px', 
+            marginBottom: '20px',
+            animation: 'rotate 2s linear infinite'
+          }}>
+            🌌
+          </div>
+          <div style={{ fontSize: '18px', marginBottom: '10px' }}>
+            正在初始化奇绩AI星系...
+          </div>
+          <div style={{ fontSize: '14px', opacity: 0.7 }}>
+            准备观测星海中的奇绩AI智慧
+          </div>
+        </div>
+      </div>
+    )
   }
-
-  const planetPositions = generatePlanetPositions(filteredAgents)
 
   return (
     <div style={{ 
@@ -100,99 +120,146 @@ export default function GalaxyHomePage() {
       overflow: 'hidden',
       position: 'relative'
     }}>
-      {/* 星空背景 */}
-      <StarField />
-
-      {/* 主要内容 */}
-      <div style={{ 
-        position: 'relative',
-        zIndex: 1,
-        minHeight: '100vh'
+      {/* 银河系AI星图标题 */}
+      <div style={{
+        position: 'fixed',
+        top: '80px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1001,
+        textAlign: 'center',
+        pointerEvents: 'none'
       }}>
-        {/* 顶部控制区域 */}
-        <GalaxyControls
-          searchTerm={searchTerm}
-          selectedTag={selectedTag}
-          allTags={allTags}
-          agentCount={agents.length}
-          enabledCount={agents.filter(a => a.enabled).length}
-          onSearchChange={setSearchTerm}
-          onTagChange={setSelectedTag}
+        <h1 style={{
+          fontSize: '48px',
+          fontWeight: 'bold',
+          color: '#e5e5e5',
+          textShadow: `
+            0 0 10px rgba(192, 192, 192, 0.8),
+            0 0 20px rgba(192, 192, 192, 0.6),
+            0 0 30px rgba(192, 192, 192, 0.4),
+            0 0 40px rgba(192, 192, 192, 0.2)
+          `,
+          animation: 'glow 2s ease-in-out infinite alternate',
+          letterSpacing: '2px',
+          margin: 0,
+          padding: 0
+        }}>
+          MiraclePlus AI Galaxy
+        </h1>
+        <p style={{
+          fontSize: '16px',
+          color: 'rgba(192, 192, 192, 0.8)',
+          margin: '8px 0 0 0',
+          textShadow: '0 0 5px rgba(192, 192, 192, 0.5)'
+        }}>
+          探索奇绩AI的星海
+        </p>
+      </div>
+
+      {/* CSS动画 */}
+      <style jsx global>{`
+        @keyframes glow {
+          from {
+            text-shadow: 
+              0 0 10px rgba(192, 192, 192, 0.8),
+              0 0 20px rgba(192, 192, 192, 0.6),
+              0 0 30px rgba(192, 192, 192, 0.4),
+              0 0 40px rgba(192, 192, 192, 0.2);
+          }
+          to {
+            text-shadow: 
+              0 0 20px rgba(192, 192, 192, 1),
+              0 0 30px rgba(192, 192, 192, 0.8),
+              0 0 50px rgba(192, 192, 192, 0.6),
+              0 0 70px rgba(192, 192, 192, 0.4);
+          }
+        }
+      `}</style>
+
+      {/* 银河系AI星图 - 基于点击次数的星等系统 */}
+      <GalaxyStarSystem 
+        agents={filteredAgents}
+      />
+
+      {/* 搜索和筛选控制 */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        left: '20px',
+        background: 'rgba(0, 0, 0, 0.9)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        borderRadius: '12px',
+        padding: '16px',
+        color: 'white',
+        fontSize: '14px',
+        zIndex: 1000,
+        minWidth: '200px',
+        maxWidth: '220px'
+      }}>
+        <div style={{ marginBottom: '12px', fontWeight: 'bold' }}>
+          🌌 奇绩AI星图
+        </div>
+        <input
+          type="text"
+          placeholder="搜索星星..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            marginBottom: '8px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '6px',
+            color: 'white',
+            boxSizing: 'border-box'
+          }}
         />
-
-        {/* 加载状态 */}
-        {loading && (
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '100px',
+        <select
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '8px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '6px',
             color: 'white'
-          }}>
-            <Spin size="large" />
-            <div style={{ marginTop: 20, fontSize: '18px' }}>
-              正在初始化银河系...
-            </div>
-          </div>
-        )}
-
-        {/* 星球区域 */}
-        {!loading && (
-          <div style={{ 
-            position: 'relative',
-            minHeight: '60vh',
-            width: '100%'
-          }}>
-            {filteredAgents.length === 0 ? (
-              <div style={{ 
-                textAlign: 'center', 
-                paddingTop: '100px',
-                color: 'white'
-              }}>
-                <Empty
-                  description={
-                    <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
-                      🌌 这片星域暂时没有发现AI星球
-                    </span>
-                  }
-                  style={{ filter: 'invert(1)' }}
-                />
-              </div>
-            ) : (
-              <>
-                {filteredAgents.map((agent, index) => (
-                  <PlanetAgent
-                    key={agent.id}
-                    agent={agent}
-                    initialPosition={planetPositions[index] || { x: 400, y: 300 }}
-                  />
-                ))}
-              </>
-            )}
-          </div>
-        )}
-
-        {/* 反馈区域 */}
-        <div style={{ 
-          position: 'relative',
-          zIndex: 10,
-          marginTop: '100px'
-        }}>
-          <FeedbackButtons />
+          }}
+        >
+          <option value="all">全部分类</option>
+          {allTags.map(tag => (
+            <option key={tag} value={tag} style={{ color: 'black' }}>{tag}</option>
+          ))}
+        </select>
+        <div style={{ marginTop: '8px', fontSize: '12px', opacity: 0.7 }}>
+          ⭐ {filteredAgents.length} 颗AI星星
         </div>
+      </div>
 
-        {/* 底部装饰 */}
-        <div style={{
-          textAlign: 'center',
-          padding: '60px 20px 40px 20px',
-          color: 'rgba(255, 255, 255, 0.4)',
-          fontSize: '14px'
-        }}>
-          <div style={{ marginBottom: 20 }}>
-            ✨ 在这片AI星海中探索无限可能 ✨
-          </div>
-          <div>
-            悬浮在星球上查看详情 • 让AI助力你的创造之旅
-          </div>
-        </div>
+      {/* 反馈按钮 */}
+      <div style={{
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 150
+      }}>
+        <FeedbackButtons />
+      </div>
+
+      {/* 底部版权信息 */}
+      <div style={{
+        position: 'fixed',
+        bottom: '10px',
+        right: '20px',
+        color: 'rgba(255, 255, 255, 0.3)',
+        fontSize: '12px',
+        zIndex: 100
+      }}>
+        ⭐ MiraclePlus AI Galaxy Star System
       </div>
     </div>
   )

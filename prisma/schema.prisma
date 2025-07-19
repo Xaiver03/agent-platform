@@ -21,7 +21,9 @@ model Agent {
   icon        String?
   coverImage  String?  @map("cover_image")
   guideContent String? @map("guide_content")
-  enabled     Boolean  @default(true)
+  themeColor  String?  @default("#FFFFFF") @map("theme_color") // 星球主题颜色
+  enabled     Boolean  @default(true) // 是否可见（显示在前端）
+  clickCount  Int      @default(0) @map("click_count")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -79,6 +81,10 @@ model Admin {
   email     String   @unique
   password  String
   name      String
+  role      String   @default("admin") // super_admin, admin
+  canChangePassword Boolean @default(false) @map("can_change_password") // 是否可以修改密码
+  canManageAdmins   Boolean @default(false) @map("can_manage_admins")   // 是否可以管理管理员
+  createdBy String?  @map("created_by") // 创建者ID
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -108,4 +114,25 @@ model FeedbackButton {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("feedback_buttons")
+}
+
+model StarMagnitudeConfig {
+  id              String  @id @default(cuid())
+  magnitude       Int     // 星等值 (1-7)
+  minClicks       Int     // 最小点击次数门槛
+  maxClicks       Int?    // 最大点击次数门槛 (null表示无上限)
+  size            Float   // 星星大小
+  brightness      Float   // 亮度值 (0-1)
+  glow            Float   // 光晕大小
+  color           String  // 默认颜色
+  label           String  // 显示标签
+  description     String? // 描述
+  isEnabled       Boolean @default(true)
+  orderIndex      Int     // 排序
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([magnitude])
+  @@index([isEnabled])
+  @@map("star_magnitude_configs")
 }

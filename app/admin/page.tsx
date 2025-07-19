@@ -2,10 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, Table, Button, Space, Tag, Modal, Form, Input, Select, Switch, message, Typography, Row, Col, Statistic, Upload, Image, Tabs, Rate } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ToolOutlined, MessageOutlined, StarOutlined, UploadOutlined, SettingOutlined } from '@ant-design/icons'
+import dynamic from 'next/dynamic'
+import { Card, Table, Button, Space, Tag, Modal, Form, Input, Select, Switch, message, Typography, Row, Col, Statistic, Upload, Image, Tabs, Rate, Divider } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ToolOutlined, MessageOutlined, StarOutlined, UploadOutlined, SettingOutlined, EyeOutlined } from '@ant-design/icons'
 import Link from 'next/link'
 import { ImageUpload } from '@/components/ImageUpload'
+import MarkdownRenderer from '@/components/MarkdownRenderer'
+
+const RichTextEditor = dynamic(() => import('@/components/RichTextEditor').then(mod => mod.RichTextEditor), {
+  ssr: false,
+  loading: () => <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #d9d9d9', borderRadius: 6 }}>加载编辑器中...</div>
+})
 
 const { Title, Text } = Typography
 const { TextArea } = Input
@@ -23,6 +30,7 @@ interface Agent {
   coverImage?: string
   guideContent?: string
   enabled: boolean
+  themeColor?: string
   createdAt: string
   applications: any[]
   feedback: any[]
@@ -73,12 +81,11 @@ export default function AdminDashboard() {
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null)
   const [form] = Form.useForm()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [feedbackConfig, setFeedbackConfig] = useState<any>(null)
-  const [configModalVisible, setConfigModalVisible] = useState(false)
-  const [configForm] = Form.useForm()
   const [buttonModalVisible, setButtonModalVisible] = useState(false)
   const [editingButton, setEditingButton] = useState<FeedbackButton | null>(null)
   const [buttonForm] = Form.useForm()
+  const [previewVisible, setPreviewVisible] = useState(false)
+  const [previewContent, setPreviewContent] = useState('')
   const router = useRouter()
 
   const [activeTab, setActiveTab] = useState('agents')
@@ -86,7 +93,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     checkAuth()
     fetchData()
-    fetchFeedbackConfig()
     fetchFeedbackButtons()
   }, [])
 
@@ -104,18 +110,6 @@ export default function AdminDashboard() {
     }
   }
 
-  const fetchFeedbackConfig = async () => {
-    try {
-      const response = await fetch('/api/feedback-config')
-      const data = await response.json()
-      setFeedbackConfig(data.config)
-      if (data.config) {
-        configForm.setFieldsValue(data.config)
-      }
-    } catch (error) {
-      message.error('获取反馈配置失败')
-    }
-  }
 
   const fetchFeedbackButtons = async () => {
     try {
@@ -123,7 +117,7 @@ export default function AdminDashboard() {
       const data = await response.json()
       setFeedbackButtons(data.buttons || [])
     } catch (error) {
-      message.error('获取反馈按钮失败')
+      message.error('获取按钮配置失败')
     }
   }
 
@@ -131,7 +125,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       const [agentsRes, applicationsRes, feedbackRes] = await Promise.all([
-        fetch('/api/agents'),
+        fetch('/api/admin/agents'),
         fetch('/api/applications'),
         fetch('/api/feedback')
       ])
@@ -250,22 +244,40 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleFeedbackConfigUpdate = async (values: any) => {
+
+  const handleVisibilityToggle = async (id: string, enabled: boolean) => {
     try {
-      const response = await fetch('/api/feedback-config', {
+      const response = await fetch(`/api/agents/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ enabled }),
       })
 
       if (!response.ok) throw new Error('更新失败')
-      message.success('反馈配置更新成功')
-      setConfigModalVisible(false)
-      fetchFeedbackConfig()
+      message.success(enabled ? '已显示' : '已隐藏')
+      fetchData()
     } catch (error) {
-      message.error('更新失败')
+      message.error('操作失败')
+    }
+  }
+
+  const handleButtonVisibilityToggle = async (id: string, enabled: boolean) => {
+    try {
+      const response = await fetch(`/api/feedback-buttons/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ enabled }),
+      })
+
+      if (!response.ok) throw new Error('更新失败')
+      message.success(enabled ? '已显示' : '已隐藏')
+      fetchFeedbackButtons()
+    } catch (error) {
+      message.error('操作失败')
     }
   }
 
@@ -283,6 +295,7 @@ export default function AdminDashboard() {
       title: '工具信息',
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       render: (text: string, record: Agent) => (
         <Space>
           {record.coverImage ? (
@@ -310,7 +323,11 @@ export default function AdminDashboard() {
           )}
           <div>
             <Link href={`/agents/${record.id}`}>{text}</Link>
-            <div style={{ fontSize: 12, color: '#666' }}>{record.description}</div>
+            <div style={{ fontSize: 12, color: '#666' }}>
+              {record.description.length > 30 
+                ? `${record.description.substring(0, 30)}...` 
+                : record.description}
+            </div>
           </div>
         </Space>
       ),
@@ -318,7 +335,7 @@ export default function AdminDashboard() {
     {
       title: '配置',
       key: 'config',
-      render: (_, record: Agent) => (
+      render: (_: any, record: Agent) => (
         <Space direction="vertical" size={0}>
           <Text style={{ fontSize: 12 }}>链接: {record.homepage || '未设置'}</Text>
           <Text style={{ fontSize: 12 }}>图标: {record.icon || '默认'}</Text>
@@ -342,14 +359,24 @@ export default function AdminDashboard() {
       title: '状态',
       dataIndex: 'enabled',
       key: 'enabled',
-      render: (enabled: boolean) => (
-        <Tag color={enabled ? 'green' : 'red'}>{enabled ? '启用' : '禁用'}</Tag>
+      render: (enabled: boolean, record: Agent) => (
+        <Space>
+          <Tag color={enabled ? 'green' : 'red'}>{enabled ? '可见' : '隐藏'}</Tag>
+          <Button
+            type="text"
+            icon={<EyeOutlined />}
+            size="small"
+            style={{ color: enabled ? '#52c41a' : '#8c8c8c' }}
+            onClick={() => handleVisibilityToggle(record.id, !enabled)}
+            title={enabled ? '隐藏' : '显示'}
+          />
+        </Space>
       ),
     },
     {
       title: '操作',
       key: 'action',
-      render: (_, record: Agent) => (
+      render: (_: any, record: Agent) => (
         <Space>
           <Button
             type="text"
@@ -495,10 +522,20 @@ export default function AdminDashboard() {
       title: '状态',
       dataIndex: 'enabled',
       key: 'enabled',
-      render: (enabled: boolean) => (
-        <Tag color={enabled ? 'success' : 'default'}>
-          {enabled ? '启用' : '禁用'}
-        </Tag>
+      render: (enabled: boolean, record: FeedbackButton) => (
+        <Space>
+          <Tag color={enabled ? 'success' : 'default'}>
+            {enabled ? '可见' : '隐藏'}
+          </Tag>
+          <Button
+            type="text"
+            icon={<EyeOutlined />}
+            size="small"
+            style={{ color: enabled ? '#52c41a' : '#8c8c8c' }}
+            onClick={() => handleButtonVisibilityToggle(record.id, !enabled)}
+            title={enabled ? '隐藏' : '显示'}
+          />
+        </Space>
       ),
     },
     {
@@ -524,7 +561,7 @@ export default function AdminDashboard() {
             onClick={() => {
               Modal.confirm({
                 title: '确认删除',
-                content: '确定要删除这个反馈按钮吗？',
+                content: '确定要删除这个按钮吗？',
                 onOk: () => handleButtonDelete(record.id),
               })
             }}
@@ -578,33 +615,36 @@ export default function AdminDashboard() {
           </Col>
         </Row>
 
-        {/* Add Tool Button */}
-        <Space style={{ marginBottom: 16 }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingAgent(null)
-              form.resetFields()
-              setModalVisible(true)
-            }}
-          >
-            添加新工具
-          </Button>
-          <Button
-            icon={<SettingOutlined />}
-            onClick={() => setConfigModalVisible(true)}
-          >
-            反馈配置
-          </Button>
-          <Button
-            onClick={handleLogout}
-          >
-            登出
-          </Button>
-          <Link href="/" legacyBehavior>
-            <Button>返回前台</Button>
-          </Link>
+        {/* Navigation and Add Tool Button */}
+        <Space style={{ marginBottom: 16, justifyContent: 'space-between', width: '100%' }}>
+          <Space>
+            <Link href="/admin/admins">
+              <Button type="default" icon={<UserOutlined />}>
+                管理员管理
+              </Button>
+            </Link>
+          </Space>
+          <Space>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setEditingAgent(null)
+                form.resetFields()
+                setModalVisible(true)
+              }}
+            >
+              添加新工具
+            </Button>
+            <Button
+              onClick={handleLogout}
+            >
+              登出
+            </Button>
+            <Link href="/" legacyBehavior>
+              <Button>返回前台</Button>
+            </Link>
+          </Space>
         </Space>
 
         {/* Tabs */}
@@ -634,7 +674,7 @@ export default function AdminDashboard() {
                 pagination={{ pageSize: 10 }}
               />
             </TabPane>
-            <TabPane tab={`反馈按钮 (${feedbackButtons.length})`} key="buttons">
+            <TabPane tab={`按钮配置 (${feedbackButtons.length})`} key="buttons">
               <Space style={{ marginBottom: 16 }}>
                 <Button
                   type="primary"
@@ -645,7 +685,7 @@ export default function AdminDashboard() {
                     setButtonModalVisible(true)
                   }}
                 >
-                  添加反馈按钮
+                  添加按钮
                 </Button>
               </Space>
               <Table
@@ -675,48 +715,109 @@ export default function AdminDashboard() {
             form={form}
             layout="vertical"
             onFinish={handleSubmit}
+            className="admin-form-custom"
           >
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item label="工具名称" name="name" rules={[{ required: true }]} >
-                  <Input placeholder="例如：Claude Code" />
+                  <Input 
+                    placeholder="例如：Claude Code" 
+                    style={{ 
+                      backgroundColor: '#fff', 
+                      color: '#000',
+                      border: '2px solid #000',
+                      borderRadius: '4px'
+                    }} 
+                  />
                 </Form.Item>
               </Col>
               <Col span={12}>
                 <Form.Item label="主理人" name="manager" rules={[{ required: true }]} >
-                  <Input placeholder="张三" />
+                  <Input 
+                    placeholder="张三" 
+                    style={{ 
+                      backgroundColor: '#fff', 
+                      color: '#000',
+                      border: '2px solid #000',
+                      borderRadius: '4px'
+                    }} 
+                  />
                 </Form.Item>
               </Col>
             </Row>
             
-            <Form.Item label="描述" name="description" rules={[{ required: true }]} >
-              <TextArea rows={3} placeholder="工具的简要描述" />
+            <Form.Item label="产品介绍" name="description" rules={[{ required: true }]} >
+              <TextArea 
+                rows={2} 
+                placeholder="用几句话简要介绍这个AI工具..." 
+                style={{ 
+                  backgroundColor: '#fff', 
+                  color: '#000',
+                  border: '2px solid #000',
+                  borderRadius: '4px',
+                  fontSize: '14px'
+                }} 
+              />
             </Form.Item>
 
             <Form.Item label="详细介绍" name="guideContent" >
-              <TextArea rows={6} placeholder="详细的使用指南和介绍内容" />
+              <div style={{ border: '1px solid #d9d9d9', borderRadius: 6 }}>
+                <RichTextEditor
+                  value={form.getFieldValue('guideContent') || ''}
+                  onChange={(content) => form.setFieldsValue({ guideContent: content })}
+                  height={400}
+                  placeholder="详细的使用指南和介绍内容（支持富文本格式）"
+                />
+              </div>
             </Form.Item>
 
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label="标签" name="tags" rules={[{ required: true }]} >
-                  <Input placeholder="编程,调试,AI助手" />
+                  <Input 
+                    placeholder="编程,调试,AI助手" 
+                    style={{ 
+                      backgroundColor: '#fff', 
+                      color: '#000',
+                      border: '2px solid #000',
+                      borderRadius: '4px'
+                    }} 
+                  />
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item label="图标" name="icon" >
-                  <Input placeholder="🤖" />
+                  <div style={{ marginBottom: 8 }}>
+                    <Input 
+                      placeholder="🤖 输入emoji或图标URL" 
+                      style={{ 
+                        backgroundColor: '#fff', 
+                        color: '#000',
+                        border: '2px solid #000',
+                        borderRadius: '4px'
+                      }} 
+                    />
+                  </div>
+                  <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>支持emoji或图标URL</div>
                 </Form.Item>
               </Col>
               <Col span={8}>
                 <Form.Item label="官网链接" name="homepage" >
-                  <Input placeholder="https://example.com" />
+                  <Input 
+                    placeholder="https://example.com" 
+                    style={{ 
+                      backgroundColor: '#fff', 
+                      color: '#000',
+                      border: '2px solid #000',
+                      borderRadius: '4px'
+                    }} 
+                  />
                 </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={16}>
-              <Col span={12}>
+              <Col span={8}>
                 <Form.Item label="封面图片" name="coverImage" >
                   <ImageUpload
                     value={form.getFieldValue('coverImage')}
@@ -724,50 +825,110 @@ export default function AdminDashboard() {
                   />
                 </Form.Item>
               </Col>
-              <Col span={12}>
-                <Form.Item label="启用状态" name="enabled" valuePropName="checked" initialValue={true}>
-                  <Switch />
+              <Col span={8}>
+                <Form.Item label="主题颜色" name="themeColor" initialValue="#FFFFFF">
+                  <Input 
+                    type="color" 
+                    style={{ 
+                      width: '100%',
+                      height: 40,
+                      backgroundColor: '#fff', 
+                      border: '2px solid #000',
+                      borderRadius: '4px'
+                    }} 
+                  />
                 </Form.Item>
+              </Col>
+              <Col span={8}>
+                <Form.Item label="可见状态" name="enabled" valuePropName="checked" initialValue={true}>
+                  <Switch checkedChildren="可见" unCheckedChildren="隐藏" />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16} style={{ marginTop: 16 }}>
+              <Col span={12}>
+                <Form.Item label="使用指南链接" name="guideUrl" >
+                  <Input 
+                    placeholder="/guides/claude-code 或 https://example.com/guide" 
+                    style={{ 
+                      backgroundColor: '#fff', 
+                      color: '#000',
+                      border: '2px solid #000',
+                      borderRadius: '4px'
+                    }} 
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Space>
+                  <Button
+                    type="default"
+                    icon={<EyeOutlined />}
+                    onClick={() => {
+                      const content = form.getFieldValue('guideContent') || ''
+                      setPreviewContent(content)
+                      setPreviewVisible(true)
+                    }}
+                  >
+                    预览指南
+                  </Button>
+                </Space>
               </Col>
             </Row>
           </Form>
         </Modal>
 
-        {/* Feedback Config Modal */}
+        {/* 预览模态框 */}
+        <style jsx global>{`
+          .admin-form-custom .ant-input,
+          .admin-form-custom .ant-input-textarea,
+          .admin-form-custom .ant-select-selector,
+          .admin-form-custom .ant-input-affix-wrapper {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border: 2px solid #000000 !important;
+            border-radius: 4px !important;
+            font-weight: 500 !important;
+          }
+          
+          .admin-form-custom .ant-input::placeholder,
+          .admin-form-custom .ant-input-textarea::placeholder {
+            color: #666666 !important;
+          }
+          
+          .admin-form-custom .ant-input:focus,
+          .admin-form-custom .ant-input-textarea:focus,
+          .admin-form-custom .ant-select-focused .ant-select-selector {
+            border-color: #000000 !important;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
+          }
+          
+          .admin-form-custom .ant-form-item-label > label {
+            color: #000000 !important;
+            font-weight: 600 !important;
+          }
+        `}</style>
         <Modal
-          title="反馈配置"
-          open={configModalVisible}
-          onCancel={() => setConfigModalVisible(false)}
-          onOk={() => configForm.submit()}
-          okText="保存"
-          cancelText="取消"
-          width={600}
+          title="使用指南预览"
+          open={previewVisible}
+          onCancel={() => setPreviewVisible(false)}
+          footer={[
+            <Button key="close" onClick={() => setPreviewVisible(false)}>
+              关闭
+            </Button>
+          ]}
+          width={800}
         >
-          <Form
-            form={configForm}
-            layout="vertical"
-            onFinish={handleFeedbackConfigUpdate}
-          >
-            <Form.Item
-              label="AI产品使用感受问卷链接"
-              name="productFeedbackUrl"
-              rules={[{ required: true, message: '请输入问卷链接' }]}
-            >
-              <Input placeholder="https://docs.google.com/forms/d/e/xxx/viewform" />
-            </Form.Item>
-            <Form.Item
-              label="体验台使用感受问卷链接"
-              name="platformFeedbackUrl"
-              rules={[{ required: true, message: '请输入问卷链接' }]}
-            >
-              <Input placeholder="https://docs.google.com/forms/d/e/xxx/viewform" />
-            </Form.Item>
-          </Form>
+          <div style={{ maxHeight: '70vh', overflow: 'auto', padding: 16 }}>
+            <MarkdownRenderer content={previewContent} />
+          </div>
         </Modal>
+
 
         {/* Feedback Button Modal */}
         <Modal
-          title={editingButton ? '编辑反馈按钮' : '添加反馈按钮'}
+          title={editingButton ? '编辑按钮' : '添加按钮'}
           open={buttonModalVisible}
           onCancel={() => {
             setButtonModalVisible(false)
@@ -841,12 +1002,12 @@ export default function AdminDashboard() {
               </Col>
             </Row>
             <Form.Item
-              label="启用状态"
+              label="可见状态"
               name="enabled"
               valuePropName="checked"
               initialValue={true}
             >
-              <Switch />
+              <Switch checkedChildren="可见" unCheckedChildren="隐藏" />
             </Form.Item>
           </Form>
         </Modal>

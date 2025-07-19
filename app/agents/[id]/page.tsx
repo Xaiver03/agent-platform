@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { Card, Typography, Button, Space, Tag, Row, Col, Avatar, Statistic, Divider, Rate, Tabs, Empty, Spin, Descriptions } from 'antd'
-import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, StarOutlined, MessageOutlined, BookOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, StarOutlined, MessageOutlined, BookOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import { FeedbackForm } from '@/components/FeedbackForm'
@@ -151,6 +151,98 @@ Cursor 是一款 AI 驱动的代码编辑器，提供智能代码补全和生成
   return guides[agentName] || `# ${agentName} 使用指南\n\n暂无详细文档，敬请期待...`
 }
 
+// 反馈卡片组件
+const FeedbackCard = ({ feedback }: { feedback: any }) => {
+  const [expanded, setExpanded] = useState(false)
+  const maxLength = 100 // 超过这个长度就显示展开按钮
+  const shouldShowExpand = feedback.comment && feedback.comment.length > maxLength
+  
+  return (
+    <Card
+      size="small"
+      style={{
+        marginBottom: 12,
+        background: '#ffffff',
+        border: '1px solid #f0f0f0',
+        borderRadius: 12,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+        transition: 'all 0.3s ease'
+      }}
+      bodyStyle={{ padding: 16 }}
+      hoverable
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.12)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0px)'
+        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.06)'
+      }}
+    >
+      <Space direction="vertical" style={{ width: '100%' }} size={12}>
+        {/* 用户信息和评分 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <Text strong style={{ fontSize: 14 }}>
+              {feedback.userName}
+            </Text>
+            {feedback.email && (
+              <div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {feedback.email}
+                </Text>
+              </div>
+            )}
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <Rate disabled defaultValue={feedback.score} size="small" />
+            <div>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {new Date(feedback.createdAt).toLocaleDateString()}
+              </Text>
+            </div>
+          </div>
+        </div>
+
+        {/* 反馈内容 */}
+        {feedback.comment && (
+          <div>
+            <Text 
+              style={{ 
+                fontSize: 13, 
+                lineHeight: 1.6,
+                display: 'block'
+              }}
+            >
+              {shouldShowExpand && !expanded 
+                ? `${feedback.comment.substring(0, maxLength)}...`
+                : feedback.comment
+              }
+            </Text>
+            
+            {shouldShowExpand && (
+              <Button
+                type="text"
+                size="small"
+                icon={expanded ? <UpOutlined /> : <DownOutlined />}
+                onClick={() => setExpanded(!expanded)}
+                style={{
+                  padding: '4px 8px',
+                  height: 'auto',
+                  fontSize: 12,
+                  marginTop: 8
+                }}
+              >
+                {expanded ? '收起' : '展开'}
+              </Button>
+            )}
+          </div>
+        )}
+      </Space>
+    </Card>
+  )
+}
+
 export default function AgentDetailPage() {
   const params = useParams()
   const [agent, setAgent] = useState<Agent | null>(null)
@@ -254,23 +346,15 @@ export default function AgentDetailPage() {
                 ))}
               </Space>
 
-              <Space>
-                <Button 
-                  type="primary" 
-                  size="large"
-                  href={agent.homepage}
-                  target="_blank"
-                >
-                  访问官网
-                </Button>
-                <Button 
-                  size="large" 
-                  icon={<MessageOutlined />}
-                  onClick={() => setShowFeedbackForm(true)}
-                >
-                  提交反馈
-                </Button>
-              </Space>
+              <Button 
+                type="primary" 
+                size="large"
+                href={agent.homepage}
+                target="_blank"
+                style={{ marginRight: 12 }}
+              >
+                访问官网
+              </Button>
             </Space>
           </Col>
         </Row>
@@ -294,6 +378,17 @@ export default function AgentDetailPage() {
 
         <Col xs={24} lg={8}>
           <Space direction="vertical" style={{ width: '100%' }} size="large">
+            {/* 添加反馈按钮 */}
+            <Button 
+              type="primary" 
+              icon={<MessageOutlined />}
+              onClick={() => setShowFeedbackForm(true)}
+              style={{ width: '100%' }}
+              size="large"
+            >
+              分享您的使用体验
+            </Button>
+            
             <Card
               title="使用统计"
               size="small"
@@ -305,27 +400,24 @@ export default function AgentDetailPage() {
               </Space>
             </Card>
 
-            {agent.feedback.length > 0 && (
-              <Card
-                title="最新反馈"
-                size="small"
-              >
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  {agent.feedback.slice(0, 3).map((feedback: any) => (
-                    <div key={feedback.id}>
-                      <Space style={{ marginBottom: 8 }}>
-                        <Text strong>{feedback.userName}</Text>
-                        <Rate disabled defaultValue={feedback.score} size="small" />
-                      </Space>
-                      <Text type="secondary" style={{ fontSize: 12 }}>
-                        {feedback.comment}
-                      </Text>
-                      <Divider style={{ margin: '8px 0' }} />
-                    </div>
+            <div>
+              <Title level={4} style={{ marginBottom: 16, fontSize: 16 }}>
+                用户反馈 ({agent.feedback.length})
+              </Title>
+              {agent.feedback.length > 0 ? (
+                <div style={{ maxHeight: '600px', overflowY: 'auto', paddingRight: 8 }}>
+                  {agent.feedback.map((feedback: any) => (
+                    <FeedbackCard key={feedback.id} feedback={feedback} />
                   ))}
-                </Space>
-              </Card>
-            )}
+                </div>
+              ) : (
+                <Card style={{ textAlign: 'center', padding: '24px 16px' }}>
+                  <Text type="secondary">
+                    暂无用户反馈，成为第一个分享使用体验的用户吧！
+                  </Text>
+                </Card>
+              )}
+            </div>
           </Space>
         </Col>
       </Row>

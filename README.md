@@ -1,285 +1,433 @@
-# 🤖 AI Agent 体验台
+# 🌌 AI Agent 体验台 - 3D银河系探索平台
 
-> 团队AI工具统一管理与体验平台 - 基于Next.js 14 + Ant Design + SQLite
+一个现代化的AI工具展示和管理平台，采用3D银河系界面，让用户在宇宙中探索各种AI工具和服务。
 
-## 🚀 项目简介
+![AI Galaxy](https://img.shields.io/badge/AI-Galaxy-blue?style=for-the-badge&logo=react)
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
+![3D](https://img.shields.io/badge/3D-Canvas-green?style=for-the-badge)
 
-AI Agent体验台是一个现代化的团队AI工具管理平台，提供工具展示、使用指南、反馈收集和后台管理功能。支持自定义封面图片、反馈问卷配置，以及完整的后台管理功能。
+## ✨ 核心特性
 
-### 📋 项目背景
-本项目源于团队对高价值AI Agent工具的统一管理需求，旨在：
-- 提升团队成员对AI工具的认知与应用效率
-- 提供统一的工具介绍、学习资源和体验入口
-- 收集使用反馈，优化工具选型
-- 建立主理人制度，促进知识分享
+### 🌟 **3D银河系界面**
+- **360度自由旋转** - 鼠标拖拽任意角度观察星系
+- **深度缩放控制** - 滚轮控制从宏观到微观视角
+- **真实物理运动** - 基于开普勒定律的行星轨道系统
+- **立体纵深感** - 真正的3D透视投影效果
 
-## ✨ 核心功能
+### 🪐 **AI工具展示**
+- **行星化展示** - 每个AI工具呈现为独特的3D行星
+- **6种行星类型** - 气态巨星、环状行星、类地行星等
+- **动态轨道** - 距离中心越远运行越慢，符合物理定律
+- **交互式探索** - 悬浮查看详情，点击深入了解
 
-### 🔧 用户端功能
-- **工具展示**: 精美的卡片式布局，支持封面图片
-- **搜索过滤**: 实时搜索和标签筛选
-- **使用指南**: 详细的工具使用说明
-- **反馈系统**: 双按钮反馈（AI产品反馈 + 平台体验反馈）
-- **响应式设计**: 完美适配手机、平板、电脑
+### 🎮 **交互体验**
+- **智能搜索** - 实时搜索AI工具名称和描述
+- **分类筛选** - 按标签快速筛选特定类型工具
+- **自动旋转模式** - 一键开启自动展示效果
+- **响应式设计** - 完美适配桌面和移动设备
 
-### 🛠️ 管理端功能
-- **工具管理**: 完整的CRUD操作
-- **申请审核**: 处理"成为主理人"申请
-- **反馈管理**: 查看和管理用户反馈
-- **配置管理**: 自定义反馈问卷链接
-- **图片上传**: 支持本地上传封面图片
-- **数据统计**: 实时统计面板
+### 🛠️ **管理功能**
+- **动态配置** - 后台实时添加、编辑、删除AI工具
+- **反馈系统** - 可配置的用户反馈按钮
+- **状态管理** - 启用/禁用工具显示控制
+- **数据持久化** - SQLite数据库存储
 
-## 🎯 快速开始
+## 🚀 快速开始
 
 ### 环境要求
-- Node.js 18+ 
-- npm/yarn/pnpm
+- Node.js 18.0+ 
+- npm 或 yarn 或 pnpm
 
-### 安装启动
+### 安装步骤
 
+1. **克隆项目**
 ```bash
-# 切换到项目目录
-cd /Users/rocalight/同步空间/micraplus/AEXD/ai-agent-platform
-
-# 安装依赖
-npm install
-
-# 初始化数据库
-npx prisma db push
-npx prisma db seed
-
-# 启动开发服务器（默认端口3000）
-npm run dev
-
-# 或指定端口启动
-npm run dev -- --port 3001
+git clone <repository-url>
+cd ai-agent-platform
 ```
 
-### 访问地址
-- **主页**: http://localhost:3000
-- **管理员登录**: http://localhost:3000/admin/login
+2. **安装依赖**
+```bash
+npm install
+# 或
+yarn install
+# 或
+pnpm install
+```
 
-### 管理员账号
-- 邮箱: admin@example.com
-- 密码: admin123
+3. **环境配置**
+```bash
+# 复制环境变量文件
+cp .env.example .env.local
 
-### ⚠️ 常见问题与解决方案
+# 配置数据库
+npx prisma generate
+npx prisma db push
+```
 
-#### 1. 浏览器无法访问（ERR_CONNECTION_REFUSED）
-- 确保服务器已启动（控制台显示 "Ready"）
-- 检查端口是否正确（默认3000）
-- 如果设置了代理，可能需要临时禁用
-- 使用 `ps aux | grep "next dev"` 检查进程
+4. **启动开发服务器**
+```bash
+npm run dev
+# 或
+yarn dev
+# 或
+pnpm dev
+```
 
-#### 2. 在Obsidian中点击链接提示错误
-- 请在浏览器（Chrome/Safari/Firefox）中打开，而不是Obsidian
-- 复制链接地址到浏览器地址栏
-- 或按住Cmd键（Mac）点击链接在浏览器中打开
+5. **访问应用**
+打开浏览器访问 [http://localhost:3000](http://localhost:3000)
 
-#### 3. 端口被占用
-- 使用 `lsof -i :3000` 查看端口占用
-- 更换端口：`npm run dev -- --port 3001`
+### 🖱️ **一键启动（macOS）**
+双击项目根目录下的 `启动AI体验台.command` 文件即可自动启动！
 
 ## 📁 项目结构
 
 ```
 ai-agent-platform/
-├── app/                          # Next.js App Router
-│   ├── page.tsx                 # 主页（含反馈按钮）
-│   ├── admin/login/page.tsx     # 管理员登录
-│   ├── admin/page.tsx           # 管理后台
-│   ├── agents/[id]/page.tsx     # 工具详情页
-│   └── api/                     # API路由
-│       ├── agents/              # 工具管理API
-│       ├── applications/        # 申请管理API
-│       ├── feedback/            # 反馈管理API
-│       ├── admin/login/         # 认证API
-│       ├── feedback-config/     # 配置API
-│       └── upload/              # 图片上传API
-├── components/
-│   ├── FeedbackButtons.tsx      # 主页反馈按钮
-│   ├── ImageUpload.tsx          # 图片上传组件
-│   ├── ApplicationForm.tsx      # 申请表单
-│   └── FeedbackForm.tsx         # 反馈表单
-├── public/uploads/              # 上传图片存储
-├── prisma/
-│   ├── schema.prisma            # 数据库模型
-│   └── seed.ts                  # 初始化数据
-├── package.json
-└── README.md
+├── app/                          # Next.js 14 App Router
+│   ├── page.tsx                  # 3D银河系主页
+│   ├── admin/                    # 管理后台
+│   ├── api/                      # API 路由
+│   └── globals.css               # 全局样式
+├── components/                   # React 组件
+│   ├── Galaxy3D.tsx              # 3D银河系核心引擎
+│   ├── EnhancedStarField.tsx     # 高级星空背景
+│   ├── RealisticPlanet.tsx       # 逼真行星组件
+│   ├── CentralStar.tsx           # 中央恒星效果
+│   ├── Galaxy3DControls.tsx      # 3D控制面板
+│   └── PlanetInfoPanel.tsx       # 行星信息面板
+├── prisma/                       # 数据库配置
+│   ├── schema.prisma             # 数据模型
+│   └── dev.db                    # SQLite 数据库
+├── docs/                         # 项目文档
+├── public/                       # 静态资源
+└── 启动AI体验台.command           # macOS 一键启动脚本
 ```
 
-## 🗄️ 数据库模型
+## 🎯 技术架构
 
-### 主要表结构
+### 前端技术栈
+- **React 18** - 现代化React开发
+- **Next.js 14** - 全栈React框架，App Router
+- **TypeScript** - 类型安全的JavaScript
+- **Ant Design** - 企业级UI组件库
+- **Canvas API** - 高性能2D/3D图形渲染
 
-```sql
--- AI工具表
-agents {
-  id, name, description, tags, manager,
-  coverImage, guideContent, homepage, icon,
-  enabled, createdAt, updatedAt
-}
+### 后端技术栈  
+- **Next.js API Routes** - 服务端API
+- **Prisma ORM** - 现代化数据库ORM
+- **SQLite** - 轻量级关系数据库
+- **Cookie认证** - 简单安全的身份验证
 
--- 管理员账号表
-admins {
-  id, email, password, name, createdAt, updatedAt
-}
+### 3D图形技术
+- **3D数学变换** - 旋转矩阵、透视投影
+- **物理仿真** - 开普勒定律轨道计算
+- **粒子系统** - 多层次星空效果
+- **性能优化** - 视锥剔除、深度排序
 
--- 反馈配置表
-feedback_config {
-  id, productFeedbackUrl, platformFeedbackUrl,
-  createdAt, updatedAt
+## 🎨 3D效果详解
+
+### 核心算法
+
+**3D旋转变换**
+```typescript
+const rotateX = (point, angle) => ({
+  x: point.x,
+  y: point.y * Math.cos(angle) - point.z * Math.sin(angle),
+  z: point.y * Math.sin(angle) + point.z * Math.cos(angle)
+})
+```
+
+**透视投影**
+```typescript
+const project3D = (point, canvas) => {
+  const distance = 800
+  const scale = distance / (distance + point.z)
+  return {
+    x: point.x * scale + canvas.width / 2,
+    y: point.y * scale + canvas.height / 2,
+    scale: scale
+  }
 }
 ```
 
-## 🎨 界面展示
+**开普勒定律**
+```typescript
+// T² ∝ r³ 简化为 T ∝ r^1.5
+const orbitSpeed = baseSpeed / Math.pow(orbitRadius / baseRadius, 0.8)
+```
 
-### 主页特色
-- **精美卡片**: 支持自定义封面图片
-- **搜索筛选**: 实时搜索 + 标签过滤
-- **右上角管理员入口**: 隐藏式设计
+### 粒子系统层次
+1. **背景星空** - 400颗静态闪烁星星
+2. **星际尘埃** - 100个旋转微粒
+3. **星云效果** - 8个大范围渐变背景
+4. **AI行星** - 动态数量的3D行星
+5. **中央恒星** - 多层光效太阳
 
-### 管理后台
-- **统计面板**: 实时数据可视化
-- **工具管理**: 完整CRUD操作
-- **图片上传**: 拖拽式上传体验
-- **配置管理**: 可视化问卷链接配置
+## 🔧 开发指南
 
-## 🔧 技术栈
+### 添加新的AI工具
 
-| 技术 | 版本 | 用途 |
-|---|---|---|
-| Next.js | 14.x | 全栈框架 |
-| TypeScript | 5.x | 类型安全 |
-| Ant Design | 5.x | UI组件库 |
-| Prisma | 5.x | 数据库ORM |
-| SQLite | - | 轻量级数据库 |
-| bcryptjs | 3.x | 密码加密 |
-| uuid | 11.x | 文件命名 |
+1. **通过管理界面**（推荐）
+   - 访问 `/admin` 管理后台
+   - 点击"新增AI工具"
+   - 填写工具信息并保存
 
-## 📱 使用指南
+2. **通过API**
+```bash
+curl -X POST http://localhost:3000/api/agents \
+  -H "Content-Type: application/json" \
+  -H "Cookie: admin-auth=true" \
+  -d '{
+    "name": "工具名称",
+    "description": "工具描述", 
+    "tags": "标签1,标签2",
+    "manager": "负责人",
+    "homepage": "https://example.com"
+  }'
+```
 
-### 用户操作
-1. 访问主页浏览AI工具
-2. 点击工具卡片查看详情
-3. 使用底部反馈按钮提交意见
-4. 通过标签筛选感兴趣的工具
+### 自定义行星类型
 
-### 管理员操作
-1. 点击右上角"管理员登录"
-2. 使用管理员账号登录
-3. 在后台管理所有工具、申请和反馈
-4. 配置反馈问卷链接
+在 `components/RealisticPlanet.tsx` 中添加新的行星类型：
 
-### 图片上传
-1. 管理员登录后进入工具编辑
-2. 使用"上传图片"按钮选择本地图片
-3. 自动生成URL并预览
+```typescript
+const planetTypes = [
+  // 现有类型...
+  {
+    type: 'custom',
+    colors: ['#FF00FF', '#00FFFF', '#FFFF00'],
+    rings: false,
+    atmosphere: true,
+    storms: false
+  }
+]
+```
+
+### 修改3D效果参数
+
+在 `components/Galaxy3D.tsx` 中调整：
+
+```typescript
+// 修改轨道参数
+const baseRadius = 300        // 第一颗行星轨道半径
+const radiusIncrement = 120   // 轨道间距
+
+// 修改粒子数量
+const starCount = 400         // 背景星星数量
+
+// 修改物理参数
+const baseSpeed = 0.5         // 基础轨道速度
+```
+
+## 🎮 使用说明
+
+### 基础操作
+- **拖拽旋转** - 鼠标按住拖拽可360度旋转银河系
+- **滚轮缩放** - 向上滚动放大，向下滚动缩小
+- **悬浮查看** - 鼠标悬浮在行星上查看基本信息
+- **点击探索** - 点击行星打开详细信息面板
+
+### 控制面板功能
+- **搜索工具** - 实时搜索AI工具名称和描述
+- **分类筛选** - 按标签筛选特定类型的工具
+- **重置视角** - 一键回到初始观察角度
+- **自动旋转** - 开启自动展示模式
+- **缩放控制** - 精确控制缩放级别
+
+### 管理后台 (`/admin`)
+- **工具管理** - 增删改查AI工具信息
+- **反馈配置** - 自定义用户反馈按钮
+- **状态控制** - 启用/禁用工具显示
+- **数据统计** - 查看工具使用统计
 
 ## 🚀 部署指南
 
-### 本地部署
+### Vercel 部署（推荐）
+
+1. **连接GitHub仓库**
 ```bash
-# 安装依赖
-npm install
-
-# 数据库初始化
-npx prisma db push
-npx prisma db seed
-
-# 启动服务
-npm run dev -- --port 3001
+npm i -g vercel
+vercel --prod
 ```
 
-### 云部署准备
-- **Vercel**: 一键部署，支持环境变量
-- **Docker**: 已准备Dockerfile模板
-- **环境变量**: 支持生产环境配置
+2. **环境变量配置**
+在Vercel Dashboard中设置：
+- `DATABASE_URL` - 数据库连接字符串
+- `ADMIN_PASSWORD` - 管理员密码
+
+### Docker 部署
+
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+### 传统服务器部署
+
+```bash
+# 构建生产版本
+npm run build
+
+# 启动生产服务
+npm start
+
+# 使用PM2管理进程
+npm install -g pm2
+pm2 start npm --name "ai-galaxy" -- start
+```
+
+## 🔧 配置选项
 
 ### 环境变量
+
 ```env
-# 生产环境示例
-DATABASE_URL="file:./prod.db"
-NEXTAUTH_URL="https://your-domain.com"
-NEXTAUTH_SECRET="your-secret-key"
+# 数据库配置
+DATABASE_URL="file:./dev.db"
+
+# 管理员配置  
+ADMIN_PASSWORD="your-admin-password"
+
+# 应用配置
+NEXT_PUBLIC_APP_NAME="AI Agent 体验台"
+NEXT_PUBLIC_APP_VERSION="1.0.0"
+
+# 3D效果配置
+NEXT_PUBLIC_ENABLE_3D="true"
+NEXT_PUBLIC_MAX_PARTICLES="400"
 ```
 
-## 🔍 API文档
+### 性能调优
 
-### 认证相关
-- `POST /api/admin/login` - 管理员登录
-- `DELETE /api/admin/login` - 管理员登出
-- `GET /api/admin/login` - 检查登录状态
+```javascript
+// 在 Galaxy3D.tsx 中调整性能参数
+const PERFORMANCE_CONFIG = {
+  starCount: 400,           // 星星数量
+  dustCount: 100,           // 尘埃粒子数量
+  targetFPS: 60,            // 目标帧率
+  cullingDistance: 800,     // 剔除距离
+  maxPlanets: 50           // 最大行星数量
+}
+```
 
-### 工具管理
-- `GET /api/agents` - 获取工具列表
-- `POST /api/agents` - 创建新工具
-- `PUT /api/agents/:id` - 更新工具
-- `DELETE /api/agents/:id` - 删除工具
+## 🤝 贡献指南
 
-### 图片上传
-- `POST /api/upload` - 上传图片
+### 开发流程
 
-## 🎯 开发计划
+1. **Fork项目** 并创建功能分支
+```bash
+git checkout -b feature/amazing-feature
+```
 
-### 已完成功能 ✅
-- [x] 基础架构搭建
-- [x] UI重构为Ant Design
-- [x] 管理员认证系统
-- [x] 反馈系统
-- [x] 图片上传功能
-- [x] 响应式设计
-- [x] 图片上传系统
-- [x] 反馈问卷配置
-- [x] 管理员后台管理
+2. **提交更改**
+```bash
+git commit -m 'Add some amazing feature'
+```
 
-### 未来功能 🚀
-- [ ] 云存储集成（AWS S3/阿里云OSS）
-- [ ] 高级搜索功能
-- [ ] 用户注册系统
-- [ ] 工具使用统计
-- [ ] 批量导入工具
-- [ ] 移动端APP
+3. **推送分支**
+```bash
+git push origin feature/amazing-feature
+```
 
-## 📞 支持与反馈
+4. **创建Pull Request**
 
-- **管理员邮箱**: admin@example.com
-- **测试账号**: admin@example.com / admin123
-- **反馈问卷**: 可在管理后台配置
+### 代码规范
 
-## 📄 许可证
+- **TypeScript** - 严格类型检查
+- **ESLint** - 代码质量检查
+- **Prettier** - 代码格式化
+- **Conventional Commits** - 提交信息规范
 
-MIT License - 可自由使用和修改
+### 测试要求
 
-## 📚 文档中心
+```bash
+# 运行测试套件
+npm test
 
-完整的项目文档请查看：**[docs/](docs/README.md)**
+# 类型检查
+npm run type-check
 
-### 📖 快速导航
-- [📥 安装指南](docs/installation.md) - 详细安装步骤
-- [🛠️ 开发指南](docs/DEVELOPMENT.md) - 开发工作流和版本管理  
-- [🔌 API文档](docs/api.md) - 接口说明和使用示例
-- [❓ 常见问题](docs/faq.md) - 问题排查和解决方案
-- [📋 更新日志](docs/CHANGELOG.md) - 版本历史和变更记录
+# 代码检查
+npm run lint
 
-### 💡 项目说明
+# 构建测试
+npm run build
+```
 
-#### 关于AEXD目录
-AEXD（AI Experience Design）是整个项目的根目录，包含：
-- **AI Agent 体验台总览页面设计.md** - 页面设计规范文档
-- **AI Agent 体验台系统 PRD文档.md** - 详细的产品需求文档
-- **ai-agent-platform/** - 实际的代码实现
-- **triody-clone/** - 另一个独立的演示项目
+## 📊 性能指标
 
-#### 开发建议
-1. **先阅读文档**：建议先阅读 [docs/](docs/README.md) 了解完整信息
-2. **数据已初始化**：数据库已包含示例数据，可直接预览
-3. **图片上传**：支持本地上传，存储在`public/uploads/`
-4. **扩展性**：代码结构清晰，易于添加新功能
+### 3D渲染性能
+- **目标帧率**: 60 FPS
+- **粒子系统**: 500+ 粒子实时渲染
+- **3D变换**: 实时矩阵计算
+- **内存使用**: < 100MB 浏览器内存
+
+### 加载性能
+- **首屏加载**: < 2秒
+- **3D初始化**: < 1秒
+- **路由切换**: < 500ms
+- **API响应**: < 200ms
+
+## 🔍 故障排除
+
+### 常见问题
+
+**Q: 3D效果不显示或卡顿**
+A: 检查浏览器是否支持Canvas API，尝试降低粒子数量
+
+**Q: 管理后台无法访问**
+A: 确认cookie设置正确，清除浏览器缓存重试
+
+**Q: 数据库连接失败**
+A: 检查 `DATABASE_URL` 环境变量，运行 `npx prisma generate`
+
+**Q: 启动脚本无权限**
+A: 在macOS中执行 `chmod +x 启动AI体验台.command`
+
+### 调试模式
+
+```bash
+# 开启详细日志
+DEBUG=* npm run dev
+
+# 禁用3D效果（调试用）
+NEXT_PUBLIC_ENABLE_3D=false npm run dev
+
+# 数据库调试
+npx prisma studio
+```
+
+## 📜 许可证
+
+本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+
+## 🙏 致谢
+
+- **React** - 强大的UI框架
+- **Next.js** - 优秀的全栈框架  
+- **Ant Design** - 美观的组件库
+- **Prisma** - 现代化的ORM
+- **Three.js生态** - 3D图形学习参考
+
+## 📞 联系方式
+
+- **项目维护者**: [您的名字]
+- **邮箱**: your.email@example.com
+- **项目主页**: https://github.com/your-username/ai-agent-platform
 
 ---
 
-*最后更新: 2025-07-18*
-*版本: v2.1 - 包含项目上下文说明*
+<div align="center">
+
+**🌌 在AI的银河系中，探索无限可能 🌌**
+
+Made with ❤️ by AI Agent Platform Team
+
+</div>

@@ -72,7 +72,7 @@ export default function AdminLogin() {
           >
             <Input.Password 
               prefix={<LockOutlined />} 
-              placeholder="admin123" 
+              placeholder="请输入密码" 
             />
           </Form.Item>
           
@@ -87,17 +87,6 @@ export default function AdminLogin() {
             </Button>
           </Form.Item>
         </Form>
-        
-        <div style={{ textAlign: 'center', marginTop: 16 }}>
-          <Space>
-            <span style={{ color: '#666', fontSize: 12 }}>
-              测试账号: admin@example.com
-            </span>
-            <span style={{ color: '#666', fontSize: 12 }}>
-              密码: admin123
-            </span>
-          </Space>
-        </div>
       </Card>
     </div>
   )

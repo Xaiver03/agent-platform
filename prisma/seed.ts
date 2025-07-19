@@ -4,21 +4,53 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  // 清空现有数据
-  await prisma.agentFeedback.deleteMany()
-  await prisma.agentApplication.deleteMany()
-  await prisma.agent.deleteMany()
-  await prisma.admin.deleteMany()
-  await prisma.feedbackConfig.deleteMany()
-  await prisma.feedbackButton.deleteMany()
+  // 清空现有数据（忽略表不存在的错误）
+  try {
+    await prisma.agentFeedback.deleteMany()
+  } catch (e) {
+    console.log('AgentFeedback table does not exist, skipping...')
+  }
+  
+  try {
+    await prisma.agentApplication.deleteMany()
+  } catch (e) {
+    console.log('AgentApplication table does not exist, skipping...')
+  }
+  
+  try {
+    await prisma.agent.deleteMany()
+  } catch (e) {
+    console.log('Agent table does not exist, skipping...')
+  }
+  
+  try {
+    await prisma.admin.deleteMany()
+  } catch (e) {
+    console.log('Admin table does not exist, skipping...')
+  }
+  
+  try {
+    await prisma.feedbackConfig.deleteMany()
+  } catch (e) {
+    console.log('FeedbackConfig table does not exist, skipping...')
+  }
+  
+  try {
+    await prisma.feedbackButton.deleteMany()
+  } catch (e) {
+    console.log('FeedbackButton table does not exist, skipping...')
+  }
 
   // 创建管理员账号
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const hashedPassword = await bcrypt.hash('miracleplus666,.', 10)
   await prisma.admin.create({
     data: {
       email: 'admin@example.com',
       password: hashedPassword,
-      name: '系统管理员'
+      name: '超级管理员',
+      role: 'super_admin',
+      canChangePassword: true,
+      canManageAdmins: true
     }
   })
 
@@ -132,6 +164,102 @@ async function main() {
         color: '#52c41a',
         order: 2,
         enabled: true
+      }
+    ]
+  })
+
+  // 创建默认星等配置（忽略已存在的数据）
+  try {
+    await prisma.starMagnitudeConfig.deleteMany()
+  } catch (e) {
+    console.log('StarMagnitudeConfig table does not exist, skipping...')
+  }
+  
+  await prisma.starMagnitudeConfig.createMany({
+    data: [
+      {
+        magnitude: 1,
+        minClicks: 1000,
+        maxClicks: null,
+        size: 8,
+        brightness: 1.0,
+        glow: 20,
+        color: '#FFD700',
+        label: '超亮星',
+        description: '最受欢迎的明星，点击1000+',
+        orderIndex: 1
+      },
+      {
+        magnitude: 2,
+        minClicks: 500,
+        maxClicks: 999,
+        size: 6,
+        brightness: 0.9,
+        glow: 16,
+        color: '#FFA500',
+        label: '一等星',
+        description: '非常受欢迎的星星，点击500-999',
+        orderIndex: 2
+      },
+      {
+        magnitude: 3,
+        minClicks: 200,
+        maxClicks: 499,
+        size: 5,
+        brightness: 0.8,
+        glow: 12,
+        color: '#FF8C00',
+        label: '二等星',
+        description: '受欢迎的星星，点击200-499',
+        orderIndex: 3
+      },
+      {
+        magnitude: 4,
+        minClicks: 100,
+        maxClicks: 199,
+        size: 4,
+        brightness: 0.7,
+        glow: 10,
+        color: '#FFFF00',
+        label: '三等星',
+        description: '中等亮度星星，点击100-199',
+        orderIndex: 4
+      },
+      {
+        magnitude: 5,
+        minClicks: 50,
+        maxClicks: 99,
+        size: 3.5,
+        brightness: 0.6,
+        glow: 8,
+        color: '#FFFFFF',
+        label: '四等星',
+        description: '普通亮度星星，点击50-99',
+        orderIndex: 5
+      },
+      {
+        magnitude: 6,
+        minClicks: 20,
+        maxClicks: 49,
+        size: 3,
+        brightness: 0.5,
+        glow: 6,
+        color: '#E6E6FA',
+        label: '五等星',
+        description: '较暗星星，点击20-49',
+        orderIndex: 6
+      },
+      {
+        magnitude: 7,
+        minClicks: 0,
+        maxClicks: 19,
+        size: 2.5,
+        brightness: 0.4,
+        glow: 4,
+        color: '#CCCCCC',
+        label: '暗星',
+        description: '最暗的星星，点击0-19',
+        orderIndex: 7
       }
     ]
   })

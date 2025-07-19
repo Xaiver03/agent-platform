@@ -80,6 +80,20 @@ public/uploads/*
 *.backup
 *.bak
 
+# Deployment files
+*.tar.gz
+*.zip
+server-setup-commands.txt
+github-secrets.txt
+
+# Build analysis
+.webpack-bundle-analysis/
+
+# Generated files
+.vercel
+.next/
+out/
+
 # Cache
 .cache/
 .parcel-cache/
