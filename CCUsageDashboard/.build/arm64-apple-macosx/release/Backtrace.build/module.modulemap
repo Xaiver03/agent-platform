@@ -1,0 +1,4 @@
+module Backtrace {
+    header "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Backtrace-Swift.h"
+    requires objc
+}

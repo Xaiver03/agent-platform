@@ -1,0 +1,187 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "Backtrace-release.module": ["<Backtrace-release.module>"]
+  "CBacktrace-release.module": ["<CBacktrace-release.module>"]
+  "CCUsageDashboard-release.exe": ["<CCUsageDashboard-release.exe>"]
+  "CCUsageDashboard-release.module": ["<CCUsageDashboard-release.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<CCUsageDashboard-release.exe>","<CCUsageDashboard-release.module>"]
+  "test": ["<CCUsageDashboard-release.exe>","<CCUsageDashboard-release.module>"]
+default: "main"
+nodes:
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+commands:
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/Backtrace/Backtrace.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/Backtrace/Demangle.swift"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/sources"]
+    description: "Write auxiliary file /Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/sources"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/atomic.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.o"]
+    description: "Compiling CBacktrace atomic.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/atomic.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/backtrace.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.o"]
+    description: "Compiling CBacktrace backtrace.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/backtrace.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/dwarf.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.o"]
+    description: "Compiling CBacktrace dwarf.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/dwarf.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/elf.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.o"]
+    description: "Compiling CBacktrace elf.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/elf.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/fileline.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.o"]
+    description: "Compiling CBacktrace fileline.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/fileline.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/mmap.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.o"]
+    description: "Compiling CBacktrace mmap.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/mmap.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/mmapio.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.o"]
+    description: "Compiling CBacktrace mmapio.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/mmapio.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/posix.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.o"]
+    description: "Compiling CBacktrace posix.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/posix.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/print.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.o"]
+    description: "Compiling CBacktrace print.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/print.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/simple.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.o"]
+    description: "Compiling CBacktrace simple.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/simple.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/sort.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.o"]
+    description: "Compiling CBacktrace sort.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/sort.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.o":
+    tool: clang
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/state.c"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.o"]
+    description: "Compiling CBacktrace state.c"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/clang","-fobjc-arc","-target","arm64-apple-macosx10.13","-O2","-DSWIFT_PACKAGE=1","-fblocks","-fmodules","-fmodule-name=CBacktrace","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-fmodules-cache-path=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-isysroot","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-fPIC","-g","-MD","-MT","dependencies","-MF","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.d","-c","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/state.c","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.o"]
+    deps: "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.d"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/DataFetcher.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/Views.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/main.swift"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/sources"]
+    description: "Write auxiliary file /Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/sources"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Backtrace.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Demangle.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/DataFetcher.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/Views.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/main.swift.o"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.product/Objects.LinkFileList"
+
+  "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Library/Developer/CommandLineTools/usr/bin/swiftc"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+
+  "<Backtrace-release.module>":
+    tool: phony
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Backtrace.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Demangle.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.swiftmodule"]
+    outputs: ["<Backtrace-release.module>"]
+
+  "<CBacktrace-release.module>":
+    tool: phony
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.o"]
+    outputs: ["<CBacktrace-release.module>"]
+
+  "<CCUsageDashboard-release.exe>":
+    tool: phony
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard"]
+    outputs: ["<CCUsageDashboard-release.exe>"]
+
+  "<CCUsageDashboard-release.module>":
+    tool: phony
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/DataFetcher.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/Views.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/main.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.swiftmodule"]
+    outputs: ["<CCUsageDashboard-release.module>"]
+
+  "C.Backtrace-release.module":
+    tool: shell
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/Backtrace/Backtrace.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/Backtrace/Demangle.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/sources"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Backtrace.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Demangle.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.swiftmodule"]
+    description: "Compiling Swift Module 'Backtrace' (2 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","Backtrace","-emit-dependencies","-emit-module","-emit-module-path","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.swiftmodule","-output-file-map","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/output-file-map.json","-parse-as-library","-whole-module-optimization","-num-threads","10","-c","@/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/sources","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release","-target","arm64-apple-macosx10.13","-swift-version","5","-O","-j10","-DSWIFT_PACKAGE","-Xcc","-fmodule-map-file=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/module.modulemap","-Xcc","-I","-Xcc","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-module-cache-path","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-parseable-output","-parse-as-library","-emit-objc-header","-emit-objc-header-path","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Backtrace-Swift.h","-color-diagnostics","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-suppress-warnings"]
+
+  "C.CCUsageDashboard-release.exe":
+    tool: shell
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Backtrace.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.build/Demangle.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/atomic.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/backtrace.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/dwarf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/elf.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/fileline.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmap.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/mmapio.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/posix.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/print.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/simple.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/sort.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/state.c.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/DataFetcher.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/Views.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/main.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.product/Objects.LinkFileList"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard"]
+    description: "Linking ./.build/arm64-apple-macosx/release/CCUsageDashboard"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-L","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release","-o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard","-module-name","CCUsageDashboard","-emit-executable","-Xlinker","-dead_strip","-Xlinker","-alias","-Xlinker","_CCUsageDashboard_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.product/Objects.LinkFileList","-target","arm64-apple-macosx12.0","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g"]
+
+  "C.CCUsageDashboard-release.module":
+    tool: shell
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/DataFetcher.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/Views.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/main.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/Backtrace.swiftmodule","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/sources"]
+    outputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/DataFetcher.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/Views.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/main.swift.o","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.swiftmodule"]
+    description: "Compiling Swift Module 'CCUsageDashboard' (3 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","CCUsageDashboard","-emit-dependencies","-emit-module","-emit-module-path","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.swiftmodule","-output-file-map","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/output-file-map.json","-whole-module-optimization","-num-threads","10","-c","@/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CCUsageDashboard.build/sources","-I","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release","-target","arm64-apple-macosx12.0","-swift-version","5","-O","-j10","-DSWIFT_PACKAGE","-Xcc","-fmodule-map-file=/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/CBacktrace.build/module.modulemap","-Xcc","-I","-Xcc","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include","-module-cache-path","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/arm64-apple-macosx/release/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","CCUsageDashboard_main","-color-diagnostics","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-package-name","ccusagedashboard"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Sources/CCUsageDashboard/","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Package.swift","/Users/rocalight/同步空间/micraplus/CCUsageDashboard/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

@@ -1,0 +1,6 @@
+version: "Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)"
+options: "832958116c4edb26a47daef84100e5ed"
+build_time: [1753179302, 200461000]
+inputs:
+  "/Users/rocalight/\u540C\u6B65\u7A7A\u95F4/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/Backtrace/Backtrace.swift": [9223372036, 854775807]
+  "/Users/rocalight/\u540C\u6B65\u7A7A\u95F4/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/Backtrace/Demangle.swift": [9223372036, 854775807]
