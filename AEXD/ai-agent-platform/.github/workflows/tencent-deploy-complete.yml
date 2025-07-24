@@ -1,0 +1,189 @@
+name: 🚀 Tencent Cloud Auto Deploy
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  NODE_VERSION: '18'
+  APP_NAME: 'ai-agent-platform'
+  DEPLOY_PATH: '/var/www/ai-agent-platform'
+
+jobs:
+  build-and-deploy:
+    name: 🌐 构建并部署到腾讯云
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: 📂 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci
+      
+    - name: 🔨 构建应用
+      run: |
+        npx prisma generate
+        npm run build
+        
+    - name: 🗂️ 创建部署包
+      run: |
+        # 创建部署包
+        mkdir -p deployment
+        cp -r .next deployment/
+        cp -r public deployment/
+        cp -r prisma deployment/
+        cp -r app deployment/
+        cp -r components deployment/
+        cp package.json deployment/
+        cp package-lock.json deployment/
+        cp next.config.js deployment/
+        cp ecosystem.config.js deployment/
+        cp .env.production deployment/ || echo "创建默认环境变量"
+        
+        # 创建环境变量文件（如果不存在）
+        if [ ! -f deployment/.env.production ]; then
+          echo 'DATABASE_URL="file:./data/production.db"' > deployment/.env.production
+          echo 'ADMIN_PASSWORD="admin123456"' >> deployment/.env.production
+          echo 'JWT_SECRET="$(openssl rand -base64 32)"' >> deployment/.env.production
+          echo 'NODE_ENV="production"' >> deployment/.env.production
+        fi
+        
+        # 打包
+        tar -czf deploy.tar.gz deployment/
+        
+    - name: 📤 上传部署包到腾讯云
+      uses: appleboy/scp-action@v0.1.5
+      with:
+        host: ${{ secrets.tencent_host }}
+        username: ${{ secrets.tencent_username }}
+        key: ${{ secrets.tencent_ssh_key }}
+        port: ${{ secrets.tencent_port || 22 }}
+        source: "deploy.tar.gz"
+        target: "/tmp/"
+        
+    - name: 🚀 部署并启动应用
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.tencent_host }}
+        username: ${{ secrets.tencent_username }}
+        key: ${{ secrets.tencent_ssh_key }}
+        port: ${{ secrets.tencent_port || 22 }}
+        script: |
+          set -e
+          echo "🚀 开始部署到腾讯云..."
+          
+          # 创建部署目录
+          sudo mkdir -p ${{ env.DEPLOY_PATH }}
+          cd ${{ env.DEPLOY_PATH }}
+          
+          # 备份当前版本
+          BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S)"
+          if [ -d ".next" ]; then
+            echo "📦 备份当前版本到: $BACKUP_NAME"
+            sudo tar -czf "$BACKUP_NAME.tar.gz" .next data/ 2>/dev/null || true
+          fi
+          
+          # 上传的部署包解压
+          echo "📂 解压部署包..."
+          sudo tar -xzf /tmp/deploy.tar.gz -C /tmp/
+          
+          # 清理旧文件
+          sudo rm -rf .next node_modules data/production.db-journal
+          
+          # 复制新文件
+          sudo cp -r /tmp/deployment/* .
+          
+          # 设置权限
+          sudo chown -R $USER:$USER ${{ env.DEPLOY_PATH }}
+          
+          # 安装生产依赖
+          echo "📦 安装生产依赖..."
+          npm ci --only=production --silent
+          
+          # 数据库初始化
+          echo "🗄️ 初始化数据库..."
+          npx prisma generate
+          npx prisma db push --accept-data-loss
+          
+          # 检查PM2是否安装
+          if ! command -v pm2 >/dev/null 2>&1; then
+            echo "📥 安装PM2..."
+            npm install -g pm2
+          fi
+          
+          # 重启应用
+          echo "🔄 重启应用..."
+          pm2 reload ${{ env.APP_NAME }} || pm2 start ecosystem.config.js
+          
+          # 保存PM2配置
+          pm2 save
+          
+          # 检查应用状态
+          echo "📊 检查应用状态..."
+          sleep 5
+          pm2 status ${{ env.APP_NAME }}
+          
+          # 清理临时文件
+          rm -rf /tmp/deploy.tar.gz /tmp/deployment
+          
+          echo "✅ 部署完成！"
+          echo "🌐 应用地址: http://$(curl -s https://ipinfo.io/ip):3000"
+          
+    - name: 🔍 健康检查
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.tencent_host }}
+        username: ${{ secrets.tencent_username }}
+        key: ${{ secrets.tencent_ssh_key }}
+        port: ${{ secrets.tencent_port || 22 }}
+        script: |
+          echo "🏥 健康检查..."
+          sleep 10
+          
+          # 检查应用是否运行
+          if pm2 status | grep -q "${{ env.APP_NAME }}"; then
+            echo "✅ 应用运行正常"
+          else
+            echo "❌ 应用未运行"
+            exit 1
+          fi
+          
+          # 检查端口
+          if netstat -tlnp | grep -q ":3000"; then
+            echo "✅ 端口3000正常监听"
+          else
+            echo "❌ 端口3000未监听"
+            exit 1
+          fi
+          
+    - name: 📬 部署完成通知
+      if: success()
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.tencent_host }}
+        username: ${{ secrets.tencent_username }}
+        key: ${{ secrets.tencent_ssh_key }}
+        port: ${{ secrets.tencent_port || 22 }}
+        script: |
+          echo "🎉 GitHub Actions自动部署完成！"
+          echo "📊 应用状态:"
+          pm2 list
+          echo "🌐 服务器IP: $(curl -s https://ipinfo.io/ip)"

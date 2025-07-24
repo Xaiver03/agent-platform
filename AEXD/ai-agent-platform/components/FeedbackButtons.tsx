@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Space, message, Tooltip, Typography } from 'antd'
+import { Button, Space, message, Tooltip, Typography, Modal, Image } from 'antd'
 
 const { Title } = Typography
 import { 
@@ -10,7 +10,8 @@ import {
   FileTextOutlined,
   BulbOutlined,
   CommentOutlined,
-  QuestionCircleOutlined 
+  QuestionCircleOutlined,
+  QrcodeOutlined 
 } from '@ant-design/icons'
 
 interface FeedbackButton {
@@ -18,6 +19,7 @@ interface FeedbackButton {
   title: string
   description?: string
   url: string
+  qrCodeImage?: string
   icon?: string
   color?: string
   order: number
@@ -36,6 +38,8 @@ const iconMap: { [key: string]: any } = {
 export function FeedbackButtons() {
   const [buttons, setButtons] = useState<FeedbackButton[]>([])
   const [loading, setLoading] = useState(true)
+  const [qrModalVisible, setQrModalVisible] = useState(false)
+  const [currentQrCode, setCurrentQrCode] = useState<{ image: string; title: string } | null>(null)
 
   useEffect(() => {
     fetchFeedbackButtons()
@@ -59,14 +63,23 @@ export function FeedbackButtons() {
   }
 
   const handleButtonClick = (button: FeedbackButton) => {
-    if (button.url) {
+    // 优先显示二维码，如果没有二维码则跳转链接
+    if (button.qrCodeImage) {
+      setCurrentQrCode({
+        image: button.qrCodeImage,
+        title: button.title
+      })
+      setQrModalVisible(true)
+    } else if (button.url) {
       window.open(button.url, '_blank')
     } else {
-      message.warning('反馈链接未配置')
+      message.warning('反馈方式未配置')
     }
   }
 
-  const getIcon = (iconName?: string) => {
+  const getIcon = (iconName?: string, hasQrCode?: boolean) => {
+    // 如果有二维码，优先显示二维码图标
+    if (hasQrCode) return <QrcodeOutlined />
     if (!iconName) return <MessageOutlined />
     const IconComponent = iconMap[iconName] || MessageOutlined
     return <IconComponent />
@@ -103,7 +116,7 @@ export function FeedbackButtons() {
             <Button
               type={index === 0 ? 'primary' : 'default'}
               size="large"
-              icon={getIcon(button.icon)}
+              icon={getIcon(button.icon, !!button.qrCodeImage)}
               onClick={() => handleButtonClick(button)}
               style={{
                 background: index === 0 
@@ -139,6 +152,78 @@ export function FeedbackButtons() {
           </Tooltip>
         ))}
       </Space>
+
+      {/* 二维码弹窗 */}
+      <Modal
+        title={
+          <div style={{ 
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontSize: '18px',
+            fontWeight: 'bold'
+          }}>
+            <QrcodeOutlined style={{ marginRight: 8, color: '#667eea' }} />
+            {currentQrCode?.title || '扫码反馈'}
+          </div>
+        }
+        open={qrModalVisible}
+        onCancel={() => {
+          setQrModalVisible(false)
+          setCurrentQrCode(null)
+        }}
+        footer={null}
+        centered
+        width={400}
+        bodyStyle={{ 
+          padding: '30px',
+          textAlign: 'center',
+          background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+        }}
+      >
+        {currentQrCode && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+            <div style={{
+              padding: '20px',
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <Image
+                src={currentQrCode.image}
+                alt={`${currentQrCode.title}二维码`}
+                width={200}
+                height={200}
+                style={{ 
+                  borderRadius: '8px',
+                  border: '2px solid #f1f5f9'
+                }}
+                preview={false}
+              />
+            </div>
+            <div style={{
+              color: '#64748b',
+              fontSize: '14px',
+              lineHeight: '1.5',
+              maxWidth: '280px'
+            }}>
+              <div style={{ 
+                fontWeight: 'bold', 
+                color: '#334155',
+                marginBottom: '8px',
+                fontSize: '16px'
+              }}>
+                📱 使用飞书/微信扫一扫
+              </div>
+              <div>
+                扫描上方二维码，快速访问反馈页面
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   )
 }

@@ -63,6 +63,7 @@ interface FeedbackButton {
   title: string
   description?: string
   url: string
+  qrCodeImage?: string
   icon?: string
   color?: string
   order: number
@@ -512,6 +513,27 @@ export default function AdminDashboard() {
       title: '图标',
       dataIndex: 'icon',
       key: 'icon',
+    },
+    {
+      title: '二维码',
+      dataIndex: 'qrCodeImage',
+      key: 'qrCodeImage',
+      render: (qrCodeImage: string) => (
+        qrCodeImage ? (
+          <Image
+            src={qrCodeImage}
+            alt="二维码"
+            width={40}
+            height={40}
+            style={{ borderRadius: 4 }}
+            preview={{
+              mask: '预览二维码'
+            }}
+          />
+        ) : (
+          <Text type="secondary" style={{ fontSize: 12 }}>无二维码</Text>
+        )
+      ),
     },
     {
       title: '颜色',
@@ -981,6 +1003,19 @@ export default function AdminDashboard() {
               rules={[{ required: true, message: '请输入链接地址' }]}
             >
               <Input placeholder="https://forms.gle/xxx" />
+            </Form.Item>
+            <Form.Item
+              label="二维码图片"
+              name="qrCodeImage"
+              extra="上传二维码图片，用户点击按钮将显示此二维码而不是跳转链接"
+            >
+              <ImageUpload 
+                value={buttonForm.getFieldValue('qrCodeImage')}
+                onChange={(url: string) => buttonForm.setFieldsValue({ qrCodeImage: url })}
+                maxSize={2}
+                accept="image/*"
+                className="qr-code-upload"
+              />
             </Form.Item>
             <Row gutter={16}>
               <Col span={8}>

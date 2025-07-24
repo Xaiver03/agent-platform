@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, description, url, icon, color, order, enabled } = body
+    const { title, description, url, qrCodeImage, icon, color, order, enabled } = body
 
     if (!title || !url) {
       return NextResponse.json(
@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
         title,
         description,
         url,
+        qrCodeImage: qrCodeImage || null,
         icon: icon || 'message',
         color: color || '#1890ff',
         order: parseInt(order) || 0,

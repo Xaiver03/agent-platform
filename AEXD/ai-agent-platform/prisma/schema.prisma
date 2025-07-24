@@ -117,6 +117,7 @@ model FeedbackButton {
   title       String
   description String?
   url         String
+  qrCodeImage String?  // 二维码图片路径
   icon        String?  // 图标类型，如 'message', 'form', 'survey' 等
   color       String?  // 按钮颜色，如 '#1890ff'
   order       Int      @default(0) // 排序顺序

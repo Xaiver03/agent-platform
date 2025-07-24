@@ -1,0 +1,90 @@
+name: 🚀 Tencent Cloud Deploy
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  NODE_VERSION: '18'
+  APP_NAME: 'ai-agent-platform'
+
+jobs:
+  deploy:
+    name: 🌐 部署到腾讯云
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: 📂 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci
+      
+    - name: 🔨 构建应用
+      run: |
+        npm run build
+        npx prisma generate
+        
+    - name: 🗂️ 准备部署包
+      run: |
+        mkdir -p deploy-package
+        cp -r .next deploy-package/
+        cp -r public deploy-package/
+        cp -r prisma deploy-package/
+        cp -r app deploy-package/
+        cp -r components deploy-package/
+        cp package.json deploy-package/
+        cp package-lock.json deploy-package/
+        cp next.config.js deploy-package/
+        cp .env.production deploy-package/
+        cp ecosystem.config.js deploy-package/
+        tar -czf deploy.tar.gz deploy-package/
+        
+    - name: 🚀 部署到腾讯云
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.TENCENT_HOST }}
+        username: ${{ secrets.TENCENT_USERNAME }}
+        key: ${{ secrets.TENCENT_SSH_KEY }}
+        port: ${{ secrets.TENCENT_PORT || 22 }}
+        script: |
+          set -e
+          echo "🚀 开始腾讯云部署..."
+          
+          # 创建项目目录
+          sudo mkdir -p /var/www/ai-agent-platform
+          cd /var/www/ai-agent-platform
+          
+          # 备份当前版本
+          if [ -d ".next" ]; then
+            echo "📦 备份当前版本..."
+            sudo tar -czf "backup-$(date +%Y%m%d-%H%M%S).tar.gz" .next data/ 2>/dev/null || true
+          fi
+          
+          # 清理旧文件
+          sudo rm -rf .next node_modules
+          
+          # 上传新文件
+          echo "📤 上传部署包..."
+          
+          # 从GitHub Actions复制文件
+          # 使用scp在后续步骤中完成
+          
+          echo "✅ 部署脚本准备完成"

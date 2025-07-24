@@ -1,0 +1,23 @@
+{
+  "name": "AI-Agent-体验台",
+  "version": "1.0.0",
+  "description": "AI工具3D展示平台",
+  "main": "standalone-server.js",
+  "pkg": {
+    "scripts": [
+      "standalone-server.js"
+    ],
+    "assets": [
+      "public/**/*",
+      "prisma/**/*",
+      ".next/**/*",
+      "app/**/*",
+      "components/**/*",
+      "lib/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist-exe"
+  }
+}

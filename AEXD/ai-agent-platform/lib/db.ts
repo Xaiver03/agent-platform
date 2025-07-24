@@ -1,8 +1,64 @@
 import { PrismaClient } from '@prisma/client'
+import path from 'path'
+import fs from 'fs'
 
 // 全局变量声明以避免开发环境中的重复连接
 declare global {
   var prisma: PrismaClient | undefined
+}
+
+// 检测是否在Electron环境中运行
+const isElectron = typeof process !== 'undefined' && process.versions.electron
+
+// 获取数据库路径
+function getDatabasePath() {
+  if (isElectron) {
+    // Electron环境 - 使用用户数据目录
+    const userDataPath = process.env.APPDATA || 
+                        (process.platform === 'darwin' ? process.env.HOME + '/Library/Application Support' : process.env.HOME + '/.local/share')
+    const appName = 'ai-agent-platform'
+    const dbDir = path.join(userDataPath, appName)
+    
+    // 确保目录存在
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true })
+    }
+    
+    return path.join(dbDir, 'ai-agent-platform.db')
+  } else {
+    // 传统环境 - 使用项目目录
+    const dbDir = path.join(process.cwd(), 'prisma')
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true })
+    }
+    return path.join(dbDir, 'dev.db')
+  }
+}
+
+// 确保数据库文件存在
+function ensureDatabaseExists(dbPath: string) {
+  if (!fs.existsSync(dbPath)) {
+    // 如果数据库不存在，创建空数据库（Prisma会自动初始化）
+    fs.closeSync(fs.openSync(dbPath, 'w'))
+  }
+}
+
+// 获取数据库URL
+function getDatabaseUrl() {
+  // 优先使用环境变量
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL
+  }
+  
+  // 动态生成路径
+  const dbPath = getDatabasePath()
+  ensureDatabaseExists(dbPath)
+  
+  // Windows路径需要特殊处理
+  const isWindows = process.platform === 'win32'
+  const dbUrl = isWindows ? dbPath.replace(/\\/g, '/') : dbPath
+  
+  return `file:${dbUrl}`
 }
 
 // 数据库连接池配置
@@ -12,7 +68,7 @@ export const prisma = globalThis.prisma || new PrismaClient({
   
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || "file:./dev.db"
+      url: getDatabaseUrl()
     }
   },
   

@@ -19,7 +19,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { title, description, url, icon, color, order, enabled } = body
+    const { title, description, url, qrCodeImage, icon, color, order, enabled } = body
 
     const button = await prisma.feedbackButton.update({
       where: { id: params.id },
@@ -27,6 +27,7 @@ export async function PUT(
         title,
         description,
         url,
+        qrCodeImage,
         icon,
         color,
         order: parseInt(order) || 0,

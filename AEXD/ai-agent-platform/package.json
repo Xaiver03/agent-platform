@@ -1,7 +1,10 @@
 {
   "name": "ai-agent-platform",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "AI Agent 体验台 - 3D银河系探索平台",
+  "author": "AI Agent Platform Team",
+  "main": "electron/main.js",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -21,7 +24,16 @@
     "analyze": "ANALYZE=true npm run build",
     "bundle:size": "npm run build && npm run analyze",
     "deps:check": "npx depcheck",
-    "deps:unused": "npx unimported"
+    "deps:unused": "npx unimported",
+    
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron electron/main.js\"",
+    "electron:build": "npm run build && electron-builder",
+    "electron:pack": "electron-builder --dir",
+    "electron:win": "electron-builder --win",
+    "electron:mac": "electron-builder --mac",
+    "electron:linux": "electron-builder --linux",
+    "electron:all": "electron-builder --win --mac --linux",
+    "electron:serve": "npm run build && npm run start"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -70,12 +82,89 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^15.4.2",
     "@types/eslint": "^8",
+    "concurrently": "^8.2.2",
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
     "postcss": "^8",
     "prisma": "^5.14.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.20.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.aiagent.platform",
+    "productName": "AI Agent 体验台",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "**/*",
+      "!**/.env*.local",
+      "!**/node_modules/**/*",
+      "!**/.next/cache/**/*",
+      "!**/dist-electron/**/*",
+      "!**/electron-builder.yml"
+    ],
+    "extraFiles": [
+      {
+        "from": ".next",
+        "to": ".next"
+      },
+      {
+        "from": "public",
+        "to": "public"
+      },
+      {
+        "from": "prisma",
+        "to": "prisma"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/favicon.ico"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "public/icon.icns",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/icon.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AI Agent 体验台"
+    }
   }
 }
