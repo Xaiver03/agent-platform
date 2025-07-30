@@ -99,24 +99,24 @@ export default function Galaxy3DPage() {
       }
       
       try {
-        // 尝试新API
-        const currentPage: number = reset ? 1 : pagination.page + 1
-        const limit: number = pagination.limit
-        
-        const params = new URLSearchParams({
-          page: currentPage.toString(),
-          limit: limit.toString()
-        })
-        
-        if (debouncedSearchTerm) {
-          params.append('search', debouncedSearchTerm)
-        }
-        if (selectedTag !== 'all') {
-          params.append('tag', selectedTag)
-        }
-        
-        const response = await fetch(`/api/agents?${params}`)
-        console.log('API响应状态:', response.status)
+        // 优先尝试动态API（连接数据库）
+          const currentPage: number = reset ? 1 : pagination.page + 1
+          const limit: number = pagination.limit
+          
+          const params = new URLSearchParams({
+            page: currentPage.toString(),
+            limit: limit.toString()
+          })
+          
+          if (debouncedSearchTerm) {
+            params.append('search', debouncedSearchTerm)
+          }
+          if (selectedTag !== 'all') {
+            params.append('tag', selectedTag)
+          }
+          
+          const response = await fetch(`/api/agents?${params}`)
+          console.log('API响应状态:', response.status)
         
         if (!response.ok) {
           const errorText = await response.text()
@@ -134,29 +134,44 @@ export default function Galaxy3DPage() {
           throw new Error('Invalid response format')
         }
       } catch (newApiError) {
-        console.log('新API失败，尝试备用API:', newApiError)
+        console.log('动态API失败，尝试静态API作为备用:', newApiError)
         
-        // 备用API（旧格式）
-        const params = new URLSearchParams()
-        if (debouncedSearchTerm) {
-          params.append('search', debouncedSearchTerm)
-        }
-        if (selectedTag !== 'all') {
-          params.append('tag', selectedTag)
-        }
-        
-        const legacyResponse = await fetch(`/api/agents/legacy?${params}`)
-        if (!legacyResponse.ok) throw new Error('Both APIs failed')
-        const legacyData = await legacyResponse.json()
-        
-        console.log('备用API响应数据:', legacyData)
-        
-        responseAgents = legacyData.agents || []
-        responsePagination = {
-          page: 1,
-          limit: responseAgents.length,
-          total: responseAgents.length,
-          pages: 1
+        // 备用：使用静态API
+        try {
+          const staticResponse = await fetch('/api/agents/static')
+          if (staticResponse.ok) {
+            const staticData = await staticResponse.json()
+            console.log('使用静态API数据:', staticData)
+            responseAgents = staticData.agents || []
+            responsePagination = staticData.pagination || responsePagination
+          } else {
+            throw new Error('Static API also failed')
+          }
+        } catch (staticErr) {
+          console.error('静态API也失败了，尝试旧版API:', staticErr)
+          
+          // 备用API（旧格式）
+          const params = new URLSearchParams()
+          if (debouncedSearchTerm) {
+            params.append('search', debouncedSearchTerm)
+          }
+          if (selectedTag !== 'all') {
+            params.append('tag', selectedTag)
+          }
+          
+          const legacyResponse = await fetch(`/api/agents/legacy?${params}`)
+          if (!legacyResponse.ok) throw new Error('Both APIs failed')
+          const legacyData = await legacyResponse.json()
+          
+          console.log('备用API响应数据:', legacyData)
+          
+          responseAgents = legacyData.agents || []
+          responsePagination = {
+            page: 1,
+            limit: responseAgents.length,
+            total: responseAgents.length,
+            pages: 1
+          }
         }
       }
       

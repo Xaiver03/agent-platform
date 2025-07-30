@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { initializeApi } from '@/lib/api-init'
+
+// 添加运行时配置
+export const runtime = 'nodejs'
 
 export async function GET() {
   try {
     console.log('[API] Fetching feedback buttons...');
+    
+    // 初始化API（包括数据库设置）
+    await initializeApi();
     
     // 确保数据库表存在
     try {

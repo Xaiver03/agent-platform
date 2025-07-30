@@ -29,6 +29,14 @@ npm run deploy:build          # Build and generate for deployment
 npm run setup:github          # Setup GitHub Actions
 ```
 
+## Auto-Commit and Push Policy
+
+**IMPORTANT: Always auto-commit and push after every fix or change**
+- After fixing any bug or making improvements, immediately commit with descriptive message
+- Always push to remote repository after committing
+- Use consistent commit message format: "fix: [description]" or "feat: [description]"
+- Include the Claude Code signature in commit messages
+
 ## Architecture Overview
 
 ### Core Technology Stack

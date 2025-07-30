@@ -48,8 +48,26 @@ export function FeedbackButtons() {
   const fetchFeedbackButtons = async () => {
     try {
       setLoading(true)
+      
+      // 首先尝试静态API
+      console.log('[FeedbackButtons] 尝试静态API...')
+      try {
+        const staticResponse = await fetch('/api/feedback-buttons/static')
+        if (staticResponse.ok) {
+          const data = await staticResponse.json()
+          console.log('[FeedbackButtons] 静态API成功:', data)
+          const enabledButtons = (data.buttons || []).filter((btn: FeedbackButton) => btn.enabled)
+          setButtons(enabledButtons)
+          setLoading(false)
+          return
+        }
+      } catch (e) {
+        console.log('[FeedbackButtons] 静态API失败:', e)
+      }
+      
+      // 然后尝试动态API
       const response = await fetch('/api/feedback-buttons')
-      console.log('FeedbackButtons API响应状态:', response.status)
+      console.log('[FeedbackButtons] 动态API响应状态:', response.status)
       
       if (!response.ok) {
         const errorText = await response.text()
