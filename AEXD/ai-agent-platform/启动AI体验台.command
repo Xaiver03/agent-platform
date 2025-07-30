@@ -159,12 +159,9 @@ print_message "   • 关闭此窗口也会停止服务器" $YELLOW
 print_message "================================" $BLUE
 echo ""
 
-# 自动打开浏览器（可选）
-read -p "是否自动在浏览器中打开主页？(y/n): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    open "http://localhost:$PORT"
-fi
+# 自动打开浏览器
+print_message "🌐 正在自动打开浏览器..." $GREEN
+open "http://localhost:$PORT"
 
 # 启动服务器
 npm run dev -- --port $PORT

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { danmakuQueries, prisma } from '@/lib/db'
+import prisma from '@/lib/prisma'
 
 // 获取弹幕列表
 export async function GET(request: NextRequest) {
@@ -12,7 +12,16 @@ export async function GET(request: NextRequest) {
     let result
     if (type === 'playback') {
       // 为播放优化的查询
-      const danmakus = await danmakuQueries.getLatestForPlayback(limit)
+      const danmakus = await prisma.danmaku.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true,
+          text: true,
+          color: true,
+          createdAt: true
+        }
+      })
       result = {
         danmakus,
         pagination: {
@@ -24,7 +33,32 @@ export async function GET(request: NextRequest) {
       }
     } else {
       // 常规分页查询
-      result = await danmakuQueries.findManyWithPagination(page, limit)
+      const skip = (page - 1) * limit
+      
+      const [danmakus, total] = await Promise.all([
+        prisma.danmaku.findMany({
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            text: true,
+            color: true,
+            createdAt: true
+          }
+        }),
+        prisma.danmaku.count()
+      ])
+      
+      result = {
+        danmakus,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      }
     }
 
     return NextResponse.json({

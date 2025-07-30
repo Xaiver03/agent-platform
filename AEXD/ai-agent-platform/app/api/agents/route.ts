@@ -1,9 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { agentQueries } from '@/lib/db'
+import prisma from '@/lib/prisma'
 
 // GET /api/agents - 获取Agent列表（支持分页和筛选）
 export async function GET(request: NextRequest) {
   try {
+    // 首先检查是否有数据
+    const agentCount = await prisma.agent.count();
+    console.log('[Agents API] Total agents in database:', agentCount);
+    
+    // 如果没有数据，创建一些默认的AI工具
+    if (agentCount === 0) {
+      console.log('[Agents API] No agents found, creating defaults...');
+      await prisma.agent.createMany({
+        data: [
+          {
+            name: 'ChatGPT',
+            description: '强大的AI对话助手',
+            tags: '对话,写作,编程',
+            manager: 'OpenAI',
+            homepage: 'https://chat.openai.com',
+            icon: '💬',
+            enabled: true,
+            clickCount: 50
+          },
+          {
+            name: 'Claude',
+            description: '安全可靠的AI助手',
+            tags: '对话,分析,编程',
+            manager: 'Anthropic',
+            homepage: 'https://claude.ai',
+            icon: '🤖',
+            enabled: true,
+            clickCount: 30
+          },
+          {
+            name: 'Midjourney',
+            description: 'AI图像生成工具',
+            tags: '图像,设计,创意',
+            manager: 'Midjourney',
+            homepage: 'https://midjourney.com',
+            icon: '🎨',
+            enabled: true,
+            clickCount: 80
+          }
+        ]
+      });
+    }
+    
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -11,15 +54,68 @@ export async function GET(request: NextRequest) {
     const tag = searchParams.get('tag') || undefined
     const enabled = searchParams.get('enabled') !== 'false' // 默认只显示启用的
 
-    console.log('API参数:', { page, limit, searchTerm, tag, enabled })
+    console.log('[Agents API] Query params:', { page, limit, searchTerm, tag, enabled })
 
-    const result = await agentQueries.findManyWithPagination(page, limit, {
-      enabled,
-      searchTerm,
-      tag
-    })
+    // 构建查询条件
+    const where: any = {}
+    
+    if (enabled !== undefined) {
+      where.enabled = enabled
+    }
+    
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      where.OR = [
+        { name: { contains: searchLower } },
+        { description: { contains: searchLower } },
+        { tags: { contains: searchLower } }
+      ]
+    }
+    
+    if (tag && tag !== 'all') {
+      where.tags = { contains: tag }
+    }
+    
+    const skip = (page - 1) * limit
+    
+    const [agents, total] = await Promise.all([
+      prisma.agent.findMany({
+        where,
+        orderBy: [
+          { enabled: 'desc' },
+          { clickCount: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          tags: true,
+          manager: true,
+          homepage: true,
+          icon: true,
+          themeColor: true,
+          enabled: true,
+          clickCount: true,
+          guideUrl: true
+        }
+      }),
+      prisma.agent.count({ where })
+    ])
+    
+    const result = {
+      agents,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    }
 
-    console.log('API结果:', result)
+    console.log('[Agents API] Result:', { count: result.agents.length, total: result.pagination.total })
 
     return NextResponse.json({
       success: true,
@@ -54,8 +150,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 使用 prisma 实例
-    const { prisma } = await import('@/lib/db')
+    // 使用统一的 prisma 实例
     
     const agent = await prisma.agent.create({
       data: {

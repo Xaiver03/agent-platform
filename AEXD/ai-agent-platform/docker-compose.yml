@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  ai-agent-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-agent-platform
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:./data/production.db
+      - NEXT_TELEMETRY_DISABLED=1
+      - JWT_SECRET=${JWT_SECRET:-your-jwt-secret-here}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-your-secure-password-here}
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/public/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }).on('error', () => { process.exit(1); });"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

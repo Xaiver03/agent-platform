@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { generateAdminToken } from '@/lib/auth'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
+import { COOKIE_NAME, getCookieConfig } from '@/lib/cookie-config'
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json()
 
+    console.log('[Login] Attempt for:', email)
+    
     const admin = await prisma.admin.findUnique({
       where: { email },
       select: {
@@ -48,12 +49,7 @@ export async function POST(request: NextRequest) {
     })
 
     // 设置cookie
-    response.cookies.set('admin-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7天
-    })
+    response.cookies.set(COOKIE_NAME, token, getCookieConfig())
 
     return response
   } catch (error) {
@@ -64,7 +60,10 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ success: true })
-  response.cookies.delete('admin-token')
+  response.cookies.set(COOKIE_NAME, '', {
+    ...getCookieConfig(),
+    maxAge: 0
+  })
   return response
 }
 

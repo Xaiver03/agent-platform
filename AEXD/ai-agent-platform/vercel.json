@@ -1,16 +1,17 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build && npm run db:generate && npm run db:push",
   "outputDirectory": ".next",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
+  "installCommand": "npm install && npx prisma generate",
   "framework": "nextjs",
-  "env": {
-    "NODE_ENV": "production",
-    "DATABASE_URL": "file:./vercel.db"
-  },
   "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
+    "app/api/**/*": {
+      "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
 }

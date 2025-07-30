@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Agent Platform API 测试</h1>
+        
+        <div class="test-section">
+            <div class="test-title">1. 测试健康检查 API</div>
+            <button onclick="testHealth()">测试 /api/health</button>
+            <div id="health-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">2. 测试数据库调试 API</div>
+            <button onclick="testDebugDB()">测试 /api/debug/db</button>
+            <div id="debug-db-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">3. 测试 Agents API</div>
+            <button onclick="testAgents()">测试 /api/agents</button>
+            <div id="agents-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">4. 测试反馈按钮 API</div>
+            <button onclick="testFeedbackButtons()">测试 /api/feedback-buttons</button>
+            <div id="feedback-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">5. 测试标签 API</div>
+            <button onclick="testTags()">测试 /api/agents/tags</button>
+            <div id="tags-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testAPI(url, resultId) {
+            const resultDiv = document.getElementById(resultId);
+            resultDiv.textContent = '正在测试...';
+            resultDiv.className = 'result';
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch(url);
+                const responseTime = Date.now() - startTime;
+                
+                const contentType = response.headers.get('content-type');
+                let data;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    responseTime: `${responseTime}ms`,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    data: data
+                };
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✓ 成功\n\n' + JSON.stringify(result, null, 2);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '✗ 失败\n\n' + JSON.stringify(result, null, 2);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ 错误\n\n' + error.toString() + '\n\n' + error.stack;
+            }
+        }
+        
+        function testHealth() {
+            testAPI('/api/health', 'health-result');
+        }
+        
+        function testDebugDB() {
+            testAPI('/api/debug/db', 'debug-db-result');
+        }
+        
+        function testAgents() {
+            testAPI('/api/agents?page=1&limit=5', 'agents-result');
+        }
+        
+        function testFeedbackButtons() {
+            testAPI('/api/feedback-buttons', 'feedback-result');
+        }
+        
+        function testTags() {
+            testAPI('/api/agents/tags?limit=10', 'tags-result');
+        }
+        
+        // 页面加载时自动测试健康检查
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html>

@@ -115,10 +115,15 @@ export default function AdminDashboard() {
   const fetchFeedbackButtons = async () => {
     try {
       const response = await fetch('/api/feedback-buttons')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+      }
       const data = await response.json()
       setFeedbackButtons(data.buttons || [])
     } catch (error) {
-      message.error('获取按钮配置失败')
+      console.error('Failed to fetch feedback buttons:', error)
+      message.error('获取按钮配置失败: ' + (error instanceof Error ? error.message : '未知错误'))
     }
   }
 

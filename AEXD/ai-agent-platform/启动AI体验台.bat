@@ -147,11 +147,9 @@ echo %COLOR_WARN%   • 关闭此窗口也会停止服务器%COLOR_RESET%
 echo %COLOR_INFO%================================%COLOR_RESET%
 echo.
 
-:: 询问是否自动打开浏览器
-set /p OPEN_BROWSER=是否自动在浏览器中打开主页？(y/n): 
-if /i "%OPEN_BROWSER%"=="y" (
-    start "" "http://localhost:%PORT%"
-)
+:: 自动打开浏览器
+echo %COLOR_INFO%🌐 正在自动打开浏览器...%COLOR_RESET%
+start "" "http://localhost:%PORT%"
 
 :: 启动服务器
 echo.

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import Link from 'next/link'
 
 interface Agent {
@@ -33,15 +33,24 @@ const getStarColor = (tags: string): string => {
   return '#9400D3' // 紫色（默认）
 }
 
-// 根据点击次数计算星等
+// 根据点击次数计算星等 - 使用缓存优化
+const starMagnitudeCache = new Map<number, any>()
 const getStarMagnitude = (clickCount: number = 0) => {
-  if (clickCount >= 1000) return { magnitude: 1, size: 8, brightness: 1.0, glow: 20, label: '超亮星' }
-  if (clickCount >= 500) return { magnitude: 2, size: 6, brightness: 0.9, glow: 16, label: '一等星' }
-  if (clickCount >= 200) return { magnitude: 3, size: 5, brightness: 0.8, glow: 12, label: '二等星' }
-  if (clickCount >= 100) return { magnitude: 4, size: 4, brightness: 0.7, glow: 10, label: '三等星' }
-  if (clickCount >= 50) return { magnitude: 5, size: 3.5, brightness: 0.6, glow: 8, label: '四等星' }
-  if (clickCount >= 20) return { magnitude: 6, size: 3, brightness: 0.5, glow: 6, label: '五等星' }
-  return { magnitude: 7, size: 2.5, brightness: 0.4, glow: 4, label: '暗星' }
+  if (starMagnitudeCache.has(clickCount)) {
+    return starMagnitudeCache.get(clickCount)
+  }
+  
+  let result
+  if (clickCount >= 1000) result = { magnitude: 1, size: 8, brightness: 1.0, glow: 20, label: '超亮星' }
+  else if (clickCount >= 500) result = { magnitude: 2, size: 6, brightness: 0.9, glow: 16, label: '一等星' }
+  else if (clickCount >= 200) result = { magnitude: 3, size: 5, brightness: 0.8, glow: 12, label: '二等星' }
+  else if (clickCount >= 100) result = { magnitude: 4, size: 4, brightness: 0.7, glow: 10, label: '三等星' }
+  else if (clickCount >= 50) result = { magnitude: 5, size: 3.5, brightness: 0.6, glow: 8, label: '四等星' }
+  else if (clickCount >= 20) result = { magnitude: 6, size: 3, brightness: 0.5, glow: 6, label: '五等星' }
+  else result = { magnitude: 7, size: 2.5, brightness: 0.4, glow: 4, label: '暗星' }
+  
+  starMagnitudeCache.set(clickCount, result)
+  return result
 }
 
 const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
@@ -70,7 +79,6 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
 
   // 响应式背景星空 - 根据屏幕尺寸自动生成
   const [windowSize, setWindowSize] = useState({ width: 1920, height: 1080 })
-  const [backgroundStars, setBackgroundStars] = useState<Array<{x: number, y: number, size: number, brightness: number, twinkleDelay: number}>>([])
 
   useEffect(() => {
     const updateWindowSize = () => {
@@ -84,10 +92,10 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
     }
   }, [])
 
-  useEffect(() => {
-    // 使用更高效的方式生成背景星星，限制数量但保持视觉效果
-    const baseStars = 50 // 基础星星数量
-    const extraStars = Math.min(30, Math.floor(windowSize.width / 100)) // 根据屏幕宽度动态添加
+  // 使用useMemo优化背景星空生成，避免不必要的重新计算
+  const backgroundStars = useMemo(() => {
+    const baseStars = 40 // 减少基础星星数量
+    const extraStars = Math.min(20, Math.floor(windowSize.width / 120)) // 进一步优化
     const starCount = baseStars + extraStars
     
     const stars = []
@@ -95,13 +103,13 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
       stars.push({
         x: Math.random() * windowSize.width,
         y: Math.random() * windowSize.height,
-        size: Math.random() < 0.1 ? 2 : 1, // 保持视觉效果，减少计算
+        size: Math.random() < 0.1 ? 2 : 1,
         brightness: Math.random() * 0.4 + 0.3,
-        twinkleDelay: Math.random() * 2 // 减少动画计算
+        twinkleDelay: Math.random() * 2
       })
     }
-    setBackgroundStars(stars)
-  }, [windowSize])
+    return stars
+  }, [windowSize.width, windowSize.height])
 
   // AI产品星星 - 带物理运动和碰撞回弹，包含尾迹系统
   const [agentStars, setAgentStars] = useState<Array<{
@@ -201,26 +209,38 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
     }
   }, [cardHovered, hoveredAgent, cardVisible])
 
-  // 物理运动和碰撞检测 - 使用requestAnimationFrame优化性能
+  // 物理运动和碰撞检测 - 优化性能，减少频闪
   useEffect(() => {
     let animationFrame: number
     let lastTime = 0
-    const targetFPS = 30 // 目标帧率
+    const targetFPS = 30 // 提升帧率以改善尾迹流畅度
     const frameInterval = 1000 / targetFPS
+    let frameCount = 0
+    let lastUpdateTime = 0
 
     const animate = (currentTime: number) => {
       if (currentTime - lastTime >= frameInterval) {
         lastTime = currentTime
+        frameCount++
         
-        setAgentStars(prevStars => {
-          return prevStars.map(star => {
+        // 尾迹每帧更新，物理计算每2帧更新一次（平衡性能和流畅度）
+        const shouldUpdatePhysics = frameCount % 2 === 0
+        
+        // 防抖机制：调整为30ms以配合新帧率
+        const shouldUpdateState = currentTime - lastUpdateTime > 30
+        
+        if (shouldUpdateState) {
+          lastUpdateTime = currentTime
+          
+          setAgentStars(prevStars => {
+            return prevStars.map(star => {
             // 如果星星被暂停或整体暂停，只更新尾迹老化，不更新位置
             if (pausedStars.has(star.agent.id) || isPaused) {
               return {
                 ...star,
                 trail: star.trail
                   .map(point => ({ ...point, age: point.age + 1 }))
-                  .filter(point => point.age < 15) // 尾迹保持15帧
+                  .filter(point => point.age < 20) // 尾迹每帧更新，保持更长
               }
             }
 
@@ -245,12 +265,12 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
               newVy += directionY * centerForce
             }
 
-            // 更新尾迹 - 添加当前位置到尾迹
+            // 优化尾迹更新 - 每帧更新尾迹，保持流畅度
             const newTrail = [
               { x: star.x, y: star.y, age: 0 },
               ...star.trail
                 .map(point => ({ ...point, age: point.age + 1 }))
-                .filter(point => point.age < 15) // 保持15个尾迹点
+                .filter(point => point.age < 15) // 保持适中的尾迹长度
             ]
 
             // 边界碰撞检测 - 概率性逃逸机制
@@ -295,8 +315,8 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
               }
             }
 
-            // UI组件碰撞检测 - 使用更高效的检测方式
-            const elements = [
+            // 优化UI碰撞检测 - 保持功能性但减少执行频率
+            const elements = shouldUpdatePhysics ? [
               // 右侧控制面板 - 整个面板区域
               { x: windowSize.width - 180, y: 20, width: 160, height: 450, type: 'panel' },
               
@@ -355,7 +375,7 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
                   height: 160,
                   type: 'card'
                 })) : [])
-            ]
+            ] : []
 
             // 简化的碰撞检测
             for (const element of elements) {
@@ -387,8 +407,9 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
               vy: newVy,
               trail: newTrail
             }
+            })
           })
-        })
+        }
       }
 
       animationFrame = requestAnimationFrame(animate)
@@ -414,13 +435,13 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
     return () => clearInterval(interval)
   }, [autoRotate])
 
-  // 鼠标拖拽控制
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // 使用useCallback优化鼠标拖拽控制，避免不必要的重新创建
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true)
     setLastMouse({ x: e.clientX, y: e.clientY })
-  }
+  }, [])
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging) return
     
     const deltaX = e.clientX - lastMouse.x
@@ -430,14 +451,14 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
     setRotateX(prev => Math.max(-90, Math.min(90, prev - deltaY * 0.5)))
     
     setLastMouse({ x: e.clientX, y: e.clientY })
-  }
+  }, [isDragging, lastMouse.x, lastMouse.y])
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false)
-  }
+  }, [])
 
-  // 点击星星记录点击次数
-  const handleStarClick = async (agentId: string) => {
+  // 使用useCallback优化点击星星处理函数
+  const handleStarClick = useCallback(async (agentId: string) => {
     try {
       await fetch(`/api/agents/${agentId}/click`, {
         method: 'POST'
@@ -445,7 +466,7 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
     } catch (error) {
       console.error('记录点击失败:', error)
     }
-  }
+  }, [])
 
   return (
     <>
@@ -1057,4 +1078,12 @@ const GalaxyStarSystem: React.FC<GalaxyStarSystemProps> = ({
   )
 }
 
-export default GalaxyStarSystem
+// 使用React.memo优化组件重渲染
+export default React.memo(GalaxyStarSystem, (prevProps, nextProps) => {
+  // 只有agents数组真正改变时才重新渲染
+  return prevProps.agents.length === nextProps.agents.length && 
+         prevProps.agents.every((agent, index) => 
+           agent.id === nextProps.agents[index]?.id && 
+           agent.clickCount === nextProps.agents[index]?.clickCount
+         )
+})

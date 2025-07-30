@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-platform",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI Agent 体验台 - 3D银河系探索平台",
   "author": "AI Agent Platform Team",
   "main": "electron/main.js",
@@ -25,6 +25,8 @@
     "bundle:size": "npm run build && npm run analyze",
     "deps:check": "npx depcheck",
     "deps:unused": "npx unimported",
+    "vercel:prepare": "node scripts/prepare-vercel-db.js --seed",
+    "vercel:deploy": "vercel --prod",
     
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron electron/main.js\"",
     "electron:build": "npm run build && electron-builder",

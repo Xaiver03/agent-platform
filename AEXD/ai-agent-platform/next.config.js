@@ -1,7 +1,13 @@
 /** @type {import('next').NextConfig} */
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
+let withBundleAnalyzer;
+try {
+  withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: process.env.ANALYZE === 'true',
+  });
+} catch {
+  // Fallback if bundle analyzer is not available
+  withBundleAnalyzer = (config) => config;
+}
 
 const nextConfig = {
   images: {
@@ -22,7 +28,7 @@ const nextConfig = {
     optimizePackageImports: ['antd', '@ant-design/icons'],
   },
   swcMinify: true,
-  output: process.env.BUILD_OUTPUT === 'export' ? 'export' : undefined,
+  output: process.env.BUILD_OUTPUT === 'export' ? 'export' : 'standalone',
   trailingSlash: false,
   poweredByHeader: false,
   generateEtags: false,

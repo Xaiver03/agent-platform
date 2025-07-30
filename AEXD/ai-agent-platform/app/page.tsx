@@ -116,10 +116,16 @@ export default function Galaxy3DPage() {
         }
         
         const response = await fetch(`/api/agents?${params}`)
-        if (!response.ok) throw new Error('New API failed')
-        const data = await response.json()
+        console.log('API响应状态:', response.status)
         
-        console.log('新API响应数据:', data)
+        if (!response.ok) {
+          const errorText = await response.text()
+          console.error('API错误响应:', errorText)
+          throw new Error(`API failed with status ${response.status}: ${errorText}`)
+        }
+        
+        const data = await response.json()
+        console.log('API响应数据:', data)
         
         if (data.success && data.agents) {
           responseAgents = data.agents
@@ -183,6 +189,10 @@ export default function Galaxy3DPage() {
       }
     } catch (err) {
       console.error('Failed to load agents:', err)
+      // 显示错误信息给用户
+      if (err instanceof Error) {
+        alert(`加载数据失败: ${err.message}`)
+      }
       if (reset) {
         setAgents([])
       }

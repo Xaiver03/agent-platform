@@ -175,11 +175,9 @@ Write-ColorMessage "   • 关闭此窗口也会停止服务器" $colors.Warn
 Write-ColorMessage "================================" $colors.Blue
 Write-Host ""
 
-# 询问是否自动打开浏览器
-$openBrowser = Read-Host "是否自动在浏览器中打开主页？(y/n)"
-if ($openBrowser -eq "y" -or $openBrowser -eq "Y") {
-    Start-Process "http://localhost:$port"
-}
+# 自动打开浏览器
+Write-ColorMessage "🌐 正在自动打开浏览器..." $colors.Green
+Start-Process "http://localhost:$port"
 
 # 启动服务器
 Write-Host ""

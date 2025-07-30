@@ -49,14 +49,46 @@ export function FeedbackButtons() {
     try {
       setLoading(true)
       const response = await fetch('/api/feedback-buttons')
+      console.log('FeedbackButtons API响应状态:', response.status)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('FeedbackButtons API错误:', errorText)
+        throw new Error(`API error ${response.status}: ${errorText}`)
+      }
+      
       const data = await response.json()
+      console.log('FeedbackButtons数据:', data)
       
       // 只显示启用的按钮
-      const enabledButtons = data.buttons.filter((btn: FeedbackButton) => btn.enabled)
+      const enabledButtons = (data.buttons || []).filter((btn: FeedbackButton) => btn.enabled)
       setButtons(enabledButtons)
     } catch (error) {
       console.error('Failed to fetch feedback buttons:', error)
-      message.error('获取反馈按钮配置失败')
+      message.error('获取反馈按钮配置失败: ' + (error instanceof Error ? error.message : '未知错误'))
+      // 设置默认按钮以避免空白
+      setButtons([
+        {
+          id: 'default-1',
+          title: 'AI产品反馈',
+          description: '对具体AI工具的使用反馈',
+          url: 'https://forms.gle/example1',
+          icon: 'message',
+          color: '#1890ff',
+          order: 1,
+          enabled: true
+        },
+        {
+          id: 'default-2',
+          title: '平台体验反馈',
+          description: '对体验台平台的建议',
+          url: 'https://forms.gle/example2',
+          icon: 'form',
+          color: '#52c41a',
+          order: 2,
+          enabled: true
+        }
+      ])
     } finally {
       setLoading(false)
     }
@@ -114,37 +146,29 @@ export function FeedbackButtons() {
         {buttons.map((button, index) => (
           <Tooltip key={button.id} title={button.description}>
             <Button
-              type={index === 0 ? 'primary' : 'default'}
+              type="primary"
               size="large"
               icon={getIcon(button.icon, !!button.qrCodeImage)}
               onClick={() => handleButtonClick(button)}
               style={{
-                background: index === 0 
-                  ? `linear-gradient(135deg, ${button.color}80, ${button.color}40)`
-                  : 'rgba(255, 255, 255, 0.1)',
-                border: `1px solid ${index === 0 ? button.color + '60' : 'rgba(255, 255, 255, 0.3)'}`,
+                background: `linear-gradient(135deg, ${button.color || '#1890ff'}80, ${button.color || '#1890ff'}40)`,
+                border: `1px solid ${(button.color || '#1890ff') + '60'}`,
                 color: 'white',
                 backdropFilter: 'blur(10px)',
                 borderRadius: '12px',
                 height: '48px',
                 padding: '0 24px',
                 fontWeight: 500,
-                boxShadow: index === 0 
-                  ? `0 8px 25px ${button.color}40`
-                  : '0 8px 25px rgba(0, 0, 0, 0.3)',
+                boxShadow: `0 8px 25px ${(button.color || '#1890ff') + '40'}`,
                 transition: 'all 0.3s ease',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)'
-                e.currentTarget.style.boxShadow = index === 0 
-                  ? `0 12px 35px ${button.color}60`
-                  : '0 12px 35px rgba(255, 255, 255, 0.2)'
+                e.currentTarget.style.boxShadow = `0 12px 35px ${(button.color || '#1890ff') + '60'}`
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)'
-                e.currentTarget.style.boxShadow = index === 0 
-                  ? `0 8px 25px ${button.color}40`
-                  : '0 8px 25px rgba(0, 0, 0, 0.3)'
+                e.currentTarget.style.boxShadow = `0 8px 25px ${(button.color || '#1890ff') + '40'}`
               }}
             >
               {button.title}

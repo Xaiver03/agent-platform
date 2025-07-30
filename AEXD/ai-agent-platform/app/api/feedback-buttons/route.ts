@@ -1,10 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
+    console.log('[API] Fetching feedback buttons...');
+    
+    // 确保数据库表存在
+    try {
+      const count = await prisma.feedbackButton.count();
+      console.log(`[API] Found ${count} feedback buttons`);
+      
+      // 如果没有按钮，创建默认按钮
+      if (count === 0) {
+        console.log('[API] Creating default feedback buttons...');
+        await prisma.feedbackButton.createMany({
+          data: [
+            {
+              title: 'AI产品反馈',
+              description: '对具体AI工具的使用反馈',
+              url: 'https://forms.gle/example1',
+              icon: 'message',
+              color: '#1890ff',
+              order: 1,
+              enabled: true
+            },
+            {
+              title: '平台体验反馈',
+              description: '对体验台平台的建议',
+              url: 'https://forms.gle/example2',
+              icon: 'form',
+              color: '#52c41a',
+              order: 2,
+              enabled: true
+            }
+          ]
+        });
+      }
+    } catch (dbError) {
+      console.error('[API] Database error:', dbError);
+      // 如果表不存在，返回空数组
+      return NextResponse.json({ buttons: [] });
+    }
+    
     const buttons = await prisma.feedbackButton.findMany({
       orderBy: [
         { order: 'asc' },
