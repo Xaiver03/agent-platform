@@ -1,4 +1,0 @@
-module CBacktrace {
-    umbrella "/Users/rocalight/同步空间/micraplus/CCUsageDashboard/.build/checkouts/swift-backtrace/Sources/CBacktrace/include"
-    export *
-}

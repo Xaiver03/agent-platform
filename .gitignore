@@ -131,3 +131,19 @@ out/
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Swift build files and caches
+CCUsageDashboard/.build/
+*.swiftmodule
+*.pcm
+*.o
+*.a
+*.dylib
+
+# Research directory
+ResearchFounderNetwork/
+
+# Large executable files  
+*.exe
+*.app
+*.dmg
