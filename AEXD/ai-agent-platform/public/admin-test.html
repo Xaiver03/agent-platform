@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理界面按钮功能测试</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #1890ff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section { 
+            margin: 30px 0; 
+            padding: 20px; 
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .result { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border-radius: 4px; 
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .success { 
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #389e0d;
+        }
+        .error { 
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #cf1322;
+        }
+        button { 
+            padding: 8px 16px; 
+            margin: 5px; 
+            cursor: pointer;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #40a9ff;
+        }
+        .danger {
+            background: #ff4d4f;
+        }
+        .danger:hover {
+            background: #ff7875;
+        }
+        .warning {
+            background: #faad14;
+        }
+        .warning:hover {
+            background: #ffc53d;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+        }
+        .input-group input, .input-group textarea {
+            width: 300px;
+            padding: 5px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+        }
+        .agent-id-input {
+            width: 100% !important;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ 管理界面按钮功能测试</h1>
+        
+        <div class="input-group">
+            <label>Agent ID:</label>
+            <input type="text" id="agentId" class="agent-id-input" placeholder="输入要测试的Agent ID" value="cmdr0bwyt000u5a69ndzjw4zr">
+            <small>默认使用你之前测试的Agent ID</small>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Agent CRUD 操作测试</h2>
+            <button onclick="testAgentGet()">获取Agent信息</button>
+            <button onclick="testAgentUpdate()">更新Agent</button>
+            <button class="danger" onclick="testAgentDelete()">删除Agent</button>
+            <button onclick="testAgentCreate()">创建Agent</button>
+            <div id="agent-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>👁️ 显示/隐藏切换测试</h2>
+            <button class="warning" onclick="testToggleHide()">隐藏Agent</button>
+            <button onclick="testToggleShow()">显示Agent</button>
+            <div id="toggle-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔘 反馈按钮管理测试</h2>
+            <button onclick="testGetButtons()">获取反馈按钮</button>
+            <button onclick="testCreateButton()">创建反馈按钮</button>
+            <button onclick="testUpdateButton()">更新反馈按钮</button>
+            <button class="danger" onclick="testDeleteButton()">删除反馈按钮</button>
+            <div id="button-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 数据获取测试</h2>
+            <button onclick="testGetAgents()">获取所有Agents</button>
+            <button onclick="testGetApplications()">获取申请记录</button>
+            <button onclick="testGetFeedback()">获取反馈记录</button>
+            <div id="data-results"></div>
+        </div>
+    </div>
+
+    <script>
+        let testButtonId = null; // 存储测试创建的按钮ID
+
+        function logResult(elementId, operation, status, response, error = null) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const isSuccess = status >= 200 && status < 300;
+            const resultClass = isSuccess ? 'success' : 'error';
+            
+            const resultHtml = `
+                <div class="result ${resultClass}">
+                    <strong>[${timestamp}] ${operation}</strong><br>
+                    Status: ${status}<br>
+                    ${error ? `Error: ${error}<br>` : ''}
+                    Response: <pre>${JSON.stringify(response, null, 2)}</pre>
+                </div>
+            `;
+            element.innerHTML += resultHtml;
+        }
+
+        function getAgentId() {
+            return document.getElementById('agentId').value || 'cmdr0bwyt000u5a69ndzjw4zr';
+        }
+
+        // Agent CRUD 测试
+        async function testAgentGet() {
+            try {
+                const response = await fetch(`/api/agents/${getAgentId()}`);
+                const data = await response.json();
+                logResult('agent-results', 'GET Agent', response.status, data);
+            } catch (error) {
+                logResult('agent-results', 'GET Agent', 0, null, error.message);
+            }
+        }
+
+        async function testAgentUpdate() {
+            try {
+                const testData = {
+                    name: "测试更新 " + new Date().getTime(),
+                    description: "这是一个管理界面测试更新",
+                    enabled: true
+                };
+                const response = await fetch(`/api/agents/${getAgentId()}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(testData)
+                });
+                const data = await response.json();
+                logResult('agent-results', 'UPDATE Agent', response.status, data);
+            } catch (error) {
+                logResult('agent-results', 'UPDATE Agent', 0, null, error.message);
+            }
+        }
+
+        async function testAgentDelete() {
+            if (!confirm('确定要删除测试Agent吗？这个操作不可恢复！')) return;
+            
+            try {
+                const response = await fetch(`/api/agents/${getAgentId()}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                logResult('agent-results', 'DELETE Agent', response.status, data);
+            } catch (error) {
+                logResult('agent-results', 'DELETE Agent', 0, null, error.message);
+            }
+        }
+
+        async function testAgentCreate() {
+            try {
+                const testData = {
+                    name: "测试Agent " + new Date().getTime(),
+                    description: "这是通过测试页面创建的Agent",
+                    tags: "测试,管理界面",
+                    manager: "测试管理员",
+                    enabled: true
+                };
+                const response = await fetch('/api/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(testData)
+                });
+                const data = await response.json();
+                logResult('agent-results', 'CREATE Agent', response.status, data);
+            } catch (error) {
+                logResult('agent-results', 'CREATE Agent', 0, null, error.message);
+            }
+        }
+
+        // 显示/隐藏切换测试
+        async function testToggleHide() {
+            try {
+                const response = await fetch(`/api/agents/${getAgentId()}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ enabled: false })
+                });
+                const data = await response.json();
+                logResult('toggle-results', 'HIDE Agent', response.status, data);
+            } catch (error) {
+                logResult('toggle-results', 'HIDE Agent', 0, null, error.message);
+            }
+        }
+
+        async function testToggleShow() {
+            try {
+                const response = await fetch(`/api/agents/${getAgentId()}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ enabled: true })
+                });
+                const data = await response.json();
+                logResult('toggle-results', 'SHOW Agent', response.status, data);
+            } catch (error) {
+                logResult('toggle-results', 'SHOW Agent', 0, null, error.message);
+            }
+        }
+
+        // 反馈按钮测试
+        async function testGetButtons() {
+            try {
+                const response = await fetch('/api/feedback-buttons');
+                const data = await response.json();
+                logResult('button-results', 'GET Buttons', response.status, data);
+            } catch (error) {
+                logResult('button-results', 'GET Buttons', 0, null, error.message);
+            }
+        }
+
+        async function testCreateButton() {
+            try {
+                const testData = {
+                    title: "测试按钮 " + new Date().getTime(),
+                    description: "测试创建的反馈按钮",
+                    url: "https://example.com/test",
+                    icon: "test",
+                    color: "#ff6b6b",
+                    order: 99,
+                    enabled: true
+                };
+                const response = await fetch('/api/feedback-buttons', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(testData)
+                });
+                const data = await response.json();
+                if (data.button && data.button.id) {
+                    testButtonId = data.button.id;
+                }
+                logResult('button-results', 'CREATE Button', response.status, data);
+            } catch (error) {
+                logResult('button-results', 'CREATE Button', 0, null, error.message);
+            }
+        }
+
+        async function testUpdateButton() {
+            if (!testButtonId) {
+                alert('请先创建一个测试按钮');
+                return;
+            }
+            
+            try {
+                const testData = {
+                    title: "更新的测试按钮 " + new Date().getTime(),
+                    description: "这是更新后的按钮",
+                    enabled: false
+                };
+                const response = await fetch(`/api/feedback-buttons/${testButtonId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(testData)
+                });
+                const data = await response.json();
+                logResult('button-results', 'UPDATE Button', response.status, data);
+            } catch (error) {
+                logResult('button-results', 'UPDATE Button', 0, null, error.message);
+            }
+        }
+
+        async function testDeleteButton() {
+            if (!testButtonId) {
+                alert('请先创建一个测试按钮');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/feedback-buttons/${testButtonId}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                logResult('button-results', 'DELETE Button', response.status, data);
+                testButtonId = null; // 清除ID
+            } catch (error) {
+                logResult('button-results', 'DELETE Button', 0, null, error.message);
+            }
+        }
+
+        // 数据获取测试
+        async function testGetAgents() {
+            try {
+                const response = await fetch('/api/admin/agents');
+                const data = await response.json();
+                logResult('data-results', 'GET All Agents', response.status, data);
+            } catch (error) {
+                logResult('data-results', 'GET All Agents', 0, null, error.message);
+            }
+        }
+
+        async function testGetApplications() {
+            try {
+                const response = await fetch('/api/applications');
+                const data = await response.json();
+                logResult('data-results', 'GET Applications', response.status, data);
+            } catch (error) {
+                logResult('data-results', 'GET Applications', 0, null, error.message);
+            }
+        }
+
+        async function testGetFeedback() {
+            try {
+                const response = await fetch('/api/feedback');
+                const data = await response.json();
+                logResult('data-results', 'GET Feedback', response.status, data);
+            } catch (error) {
+                logResult('data-results', 'GET Feedback', 0, null, error.message);
+            }
+        }
+
+        // 页面加载时自动测试基础功能
+        window.onload = function() {
+            setTimeout(() => {
+                testAgentGet();
+                testGetButtons();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
