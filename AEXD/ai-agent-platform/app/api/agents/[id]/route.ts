@@ -3,14 +3,16 @@ import prisma from '../../../../lib/prisma-simple'
 import { getAdminFromToken } from '../../../../lib/auth'
 import { initializeApi } from '../../../../lib/api-init'
 
+// 添加运行时配置
+export const runtime = 'nodejs'
+
 // 使用传统的参数格式，确保兼容性
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const params = await context.params
     console.log('[GET] Agent ID:', params.id);
     
     // Initialize API (for Vercel)
@@ -49,10 +51,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const params = await context.params
     console.log('[PUT] Agent ID:', params.id);
     console.log('[PUT] Request method:', request.method);
     console.log('[PUT] Request URL:', request.url);
@@ -121,10 +122,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const params = await context.params
     console.log('[DELETE] Agent ID:', params.id);
     
     // Initialize API (for Vercel)
@@ -155,9 +155,8 @@ export async function DELETE(
 
 export async function OPTIONS(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const params = await context.params
   console.log('[OPTIONS] Called for agent:', params.id);
   return new NextResponse(null, {
     status: 200,

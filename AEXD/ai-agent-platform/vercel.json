@@ -6,19 +6,5 @@
     "app/api/**/*": {
       "maxDuration": 30
     }
-  },
-  "routes": [
-    {
-      "src": "/api/agents/([^/]+)",
-      "dest": "/api/agents/[id]"
-    },
-    {
-      "src": "/api/test-405/([^/]+)",
-      "dest": "/api/test-405/[id]"
-    },
-    {
-      "src": "/api/test-simple-dynamic/([^/]+)",
-      "dest": "/api/test-simple-dynamic/[testid]"
-    }
-  ]
+  }
 }

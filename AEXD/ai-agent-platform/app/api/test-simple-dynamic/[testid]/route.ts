@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// 最简单的动态路由测试 - 不使用任何复杂逻辑
+// 添加运行时配置
+export const runtime = 'nodejs'
+
+// 最简单的动态路由测试 - 使用统一的参数格式
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ testid: string }> }
+  { params }: { params: { testid: string } }
 ) {
-  const params = await context.params
   console.log('[SIMPLE-DYNAMIC-GET] ID:', params.testid)
   
   return NextResponse.json({ 
@@ -19,9 +21,8 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ testid: string }> }
+  { params }: { params: { testid: string } }
 ) {
-  const params = await context.params
   console.log('[SIMPLE-DYNAMIC-PUT] ID:', params.testid)
   
   return NextResponse.json({ 
@@ -35,9 +36,8 @@ export async function PUT(
 
 export async function OPTIONS(
   request: NextRequest,
-  context: { params: Promise<{ testid: string }> }
+  { params }: { params: { testid: string } }
 ) {
-  const params = await context.params
   console.log('[SIMPLE-DYNAMIC-OPTIONS] ID:', params.testid)
   
   return new NextResponse(null, {
