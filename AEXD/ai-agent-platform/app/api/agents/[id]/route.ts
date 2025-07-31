@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import prisma from '../../../../lib/prisma-simple'
+import { getAdminFromToken } from '../../../../lib/auth'
+import { initializeApi } from '../../../../lib/api-init'
 
-const prisma = new PrismaClient()
+// 使用传统的参数格式，确保兼容性
 
-// GET /api/agents/[id] - 获取单个Agent详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
+    console.log('[GET] Agent ID:', params.id);
+    
+    // Initialize API (for Vercel)
+    await initializeApi();
+    
     const agent = await prisma.agent.findUnique({
       where: { id: params.id },
       include: {
@@ -32,7 +39,7 @@ export async function GET(
 
     return NextResponse.json({ agent })
   } catch (error) {
-    console.error('Error fetching agent:', error)
+    console.error('[GET] Error:', error)
     return NextResponse.json(
       { error: 'Failed to fetch agent' },
       { status: 500 }
@@ -40,14 +47,45 @@ export async function GET(
   }
 }
 
-// PUT /api/agents/[id] - 更新Agent (管理员)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
+    console.log('[PUT] Agent ID:', params.id);
+    console.log('[PUT] Request method:', request.method);
+    console.log('[PUT] Request URL:', request.url);
+    
+    // Initialize API (for Vercel)
+    await initializeApi();
+    
+    // Check admin authentication
+    const admin = await getAdminFromToken(request)
+    if (!admin) {
+      console.log('[PUT] Unauthorized: No admin token found')
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    
     const body = await request.json()
-    const { name, description, tags, manager, guideUrl, homepage, icon, enabled, themeColor } = body
+    console.log('[PUT] Request body:', body)
+    
+    const { 
+      name, 
+      description, 
+      tags, 
+      manager, 
+      guideUrl, 
+      homepage, 
+      icon, 
+      enabled, 
+      themeColor,
+      coverImage,
+      guideContent
+    } = body
 
     // 构建更新数据，只包含提供的字段
     const updateData: any = {}
@@ -60,15 +98,20 @@ export async function PUT(
     if (icon !== undefined) updateData.icon = icon
     if (enabled !== undefined) updateData.enabled = enabled
     if (themeColor !== undefined) updateData.themeColor = themeColor
+    if (coverImage !== undefined) updateData.coverImage = coverImage
+    if (guideContent !== undefined) updateData.guideContent = guideContent
+
+    console.log('[PUT] Update data:', updateData)
 
     const agent = await prisma.agent.update({
       where: { id: params.id },
       data: updateData
     })
 
+    console.log('[PUT] Update successful')
     return NextResponse.json({ agent })
   } catch (error) {
-    console.error('Error updating agent:', error)
+    console.error('[PUT] Error:', error)
     return NextResponse.json(
       { error: 'Failed to update agent' },
       { status: 500 }
@@ -76,22 +119,53 @@ export async function PUT(
   }
 }
 
-// DELETE /api/agents/[id] - 删除Agent (管理员)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
+    console.log('[DELETE] Agent ID:', params.id);
+    
+    // Initialize API (for Vercel)
+    await initializeApi();
+    
+    // Check admin authentication
+    const admin = await getAdminFromToken(request)
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    
     await prisma.agent.delete({
       where: { id: params.id }
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting agent:', error)
+    console.error('[DELETE] Error:', error)
     return NextResponse.json(
       { error: 'Failed to delete agent' },
       { status: 500 }
     )
   }
+}
+
+export async function OPTIONS(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params
+  console.log('[OPTIONS] Called for agent:', params.id);
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Allow': 'GET, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
 }

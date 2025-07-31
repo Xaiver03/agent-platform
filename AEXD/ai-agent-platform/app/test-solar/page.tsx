@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import GalaxyStarSystem from '@/components/GalaxyStarSystem'
+import GalaxyStarSystem from '../../components/GalaxyStarSystem'
 
 // 测试数据 - 模拟不同点击次数的AI工具
 const testAgents = [

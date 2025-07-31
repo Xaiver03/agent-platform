@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { initializeApi } from '@/lib/api-init'
+import prisma from '../../../lib/prisma-simple'
+import { initializeApi } from '../../../lib/api-init'
 
 // 添加运行时配置
 export const runtime = 'nodejs'
@@ -68,7 +68,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { getAdminFromToken } = await import('@/lib/auth')
+    const { getAdminFromToken } = await import('../../../lib/auth')
     const admin = await getAdminFromToken(request)
     
     if (!admin) {

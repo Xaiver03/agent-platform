@@ -6,7 +6,7 @@ import { Card, Typography, Button, Space, Tag, Row, Col, Avatar, Statistic, Divi
 import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, StarOutlined, MessageOutlined, BookOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
-import { FeedbackForm } from '@/components/FeedbackForm'
+import { FeedbackForm } from '../../../components/FeedbackForm'
 
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs

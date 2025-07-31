@@ -6,10 +6,10 @@ import dynamic from 'next/dynamic'
 import { Card, Table, Button, Space, Tag, Modal, Form, Input, Select, Switch, message, Typography, Row, Col, Statistic, Upload, Image, Tabs, Rate, Divider } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, UserOutlined, ToolOutlined, MessageOutlined, StarOutlined, UploadOutlined, SettingOutlined, EyeOutlined } from '@ant-design/icons'
 import Link from 'next/link'
-import { ImageUpload } from '@/components/ImageUpload'
-import MarkdownRenderer from '@/components/MarkdownRenderer'
+import { ImageUpload } from '../../components/ImageUpload'
+import MarkdownRenderer from '../../components/MarkdownRenderer'
 
-const RichTextEditor = dynamic(() => import('@/components/RichTextEditor').then(mod => mod.RichTextEditor), {
+const RichTextEditor = dynamic(() => import('../../components/RichTextEditor').then(mod => mod.RichTextEditor), {
   ssr: false,
   loading: () => <div style={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #d9d9d9', borderRadius: 6 }}>加载编辑器中...</div>
 })
@@ -140,6 +140,7 @@ export default function AdminDashboard() {
       const applicationsData = await applicationsRes.json()
       const feedbackData = await feedbackRes.json()
 
+      console.log('Fetched agents data:', agentsData.agents)
       setAgents(agentsData.agents || [])
       setApplications(applicationsData.applications || [])
       setFeedback(feedbackData.feedback || [])
@@ -155,15 +156,26 @@ export default function AdminDashboard() {
       const url = editingAgent ? `/api/agents/${editingAgent.id}` : '/api/agents'
       const method = editingAgent ? 'PUT' : 'POST'
 
+      console.log('Submitting values:', values)
+      console.log('URL:', url, 'Method:', method)
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(values),
       })
 
-      if (!response.ok) throw new Error('操作失败')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Response error:', response.status, errorData)
+        throw new Error(errorData.error || `操作失败 (${response.status})`)
+      }
+
+      const data = await response.json()
+      console.log('Response data:', data)
 
       message.success(editingAgent ? '更新成功' : '创建成功')
       setModalVisible(false)
@@ -171,7 +183,8 @@ export default function AdminDashboard() {
       setEditingAgent(null)
       fetchData()
     } catch (error) {
-      message.error('操作失败')
+      console.error('Submit error:', error)
+      message.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 
@@ -179,6 +192,7 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(`/api/agents/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       })
 
       if (!response.ok) throw new Error('删除失败')
@@ -222,6 +236,9 @@ export default function AdminDashboard() {
         order: parseInt(values.order) || 0
       }
 
+      console.log('Button submit - URL:', url, 'Method:', method)
+      console.log('Button submit data:', submitData)
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -231,10 +248,13 @@ export default function AdminDashboard() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error('API Error:', errorData)
-        throw new Error(errorData.error || '操作失败')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Button API Error:', response.status, errorData)
+        throw new Error(errorData.error || `操作失败 (${response.status})`)
       }
+
+      const data = await response.json()
+      console.log('Button response data:', data)
 
       message.success(editingButton ? '更新成功' : '创建成功')
       setButtonModalVisible(false)
@@ -264,19 +284,28 @@ export default function AdminDashboard() {
 
   const handleVisibilityToggle = async (id: string, enabled: boolean) => {
     try {
+      console.log('Toggling visibility for agent:', id, 'enabled:', enabled)
       const response = await fetch(`/api/agents/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 确保包含cookies
         body: JSON.stringify({ enabled }),
       })
+      
+      console.log('Toggle response:', response.status, response.statusText)
 
-      if (!response.ok) throw new Error('更新失败')
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('Toggle error:', response.status, errorData)
+        throw new Error(`更新失败: ${response.status} ${response.statusText}`)
+      }
       message.success(enabled ? '已显示' : '已隐藏')
       fetchData()
     } catch (error) {
-      message.error('操作失败')
+      console.error('Toggle operation error:', error)
+      message.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 
@@ -399,8 +428,11 @@ export default function AdminDashboard() {
             type="text"
             icon={<EditOutlined />}
             onClick={() => {
+              console.log('Edit button clicked for agent:', record)
+              console.log('Agent guideContent:', record.guideContent)
               setEditingAgent(record)
               form.setFieldsValue(record)
+              console.log('Form values after setting:', form.getFieldsValue())
               setModalVisible(true)
             }}
           />
@@ -803,11 +835,17 @@ export default function AdminDashboard() {
               />
             </Form.Item>
 
-            <Form.Item label="详细介绍" name="guideContent" >
+            <Form.Item 
+              label="详细介绍" 
+              name="guideContent"
+            >
               <div style={{ border: '1px solid #d9d9d9', borderRadius: 6 }}>
                 <RichTextEditor
-                  value={form.getFieldValue('guideContent') || ''}
-                  onChange={(content) => form.setFieldsValue({ guideContent: content })}
+                  value={form.getFieldValue('guideContent')}
+                  onChange={(value) => {
+                    console.log('RichTextEditor onChange:', value)
+                    form.setFieldsValue({ guideContent: value })
+                  }}
                   height={400}
                   placeholder="详细的使用指南和介绍内容（支持富文本格式）"
                 />

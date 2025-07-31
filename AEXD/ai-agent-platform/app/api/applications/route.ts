@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '../../../lib/prisma-simple'
 
 // POST /api/applications - 提交申请
 export async function POST(request: NextRequest) {

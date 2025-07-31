@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>完整路由测试</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background: #e8f5e9; }
+        .error { background: #ffebee; }
+        button { margin: 5px; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <h1>完整路由测试</h1>
+    
+    <div id="results"></div>
+    
+    <script>
+        const agentId = 'cmdr0bwyt000u5a69ndzjw4zr';
+        const results = document.getElementById('results');
+        
+        function addResult(title, success, details) {
+            const div = document.createElement('div');
+            div.className = `test ${success ? 'success' : 'error'}`;
+            div.innerHTML = `<strong>${title}</strong><br>${details}`;
+            results.appendChild(div);
+        }
+        
+        async function testRoute(path, method = 'GET', body = null) {
+            try {
+                const options = {
+                    method: method,
+                    credentials: 'include',
+                    headers: {}
+                };
+                
+                if (body && ['PUT', 'POST', 'PATCH'].includes(method)) {
+                    options.headers['Content-Type'] = 'application/json';
+                    options.body = JSON.stringify(body);
+                }
+                
+                console.log(`Testing ${method} ${path}`);
+                const response = await fetch(path, options);
+                
+                let responseBody = '';
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    responseBody = JSON.stringify(await response.json(), null, 2);
+                } else {
+                    responseBody = await response.text();
+                }
+                
+                addResult(
+                    `${method} ${path}`,
+                    response.ok,
+                    `Status: ${response.status} ${response.statusText}<br>
+                     Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}<br>
+                     Body: <pre>${responseBody.substring(0, 500)}</pre>`
+                );
+                
+                return { ok: response.ok, status: response.status };
+            } catch (error) {
+                addResult(
+                    `${method} ${path}`,
+                    false,
+                    `Error: ${error.message}`
+                );
+                return { ok: false, error: error.message };
+            }
+        }
+        
+        async function runTests() {
+            // 测试新创建的测试路由
+            addResult('测试1: 极简测试路由', true, '测试 /api/test-405/[id]');
+            await testRoute(`/api/test-405/${agentId}`, 'GET');
+            await testRoute(`/api/test-405/${agentId}`, 'PUT', { test: true });
+            await testRoute(`/api/test-405/${agentId}`, 'OPTIONS');
+            
+            // 测试旧格式路由
+            addResult('测试2: 旧格式路由', true, '测试 /api/agents-old/[id]');
+            await testRoute(`/api/agents-old/${agentId}`, 'GET');
+            await testRoute(`/api/agents-old/${agentId}`, 'PUT', { test: true });
+            
+            // 测试原始问题路由
+            addResult('测试3: 原始问题路由', true, '测试 /api/agents/[id]');
+            await testRoute(`/api/agents/${agentId}`, 'GET');
+            await testRoute(`/api/agents/${agentId}`, 'OPTIONS');
+            await testRoute(`/api/agents/${agentId}`, 'PUT', { enabled: true });
+            
+            // 测试其他动态路由
+            addResult('测试4: 其他API路由', true, '测试各种API路由');
+            await testRoute('/api/agents', 'GET');
+            await testRoute('/api/admin/agents', 'GET');
+            await testRoute(`/api/agents/${agentId}/click`, 'POST');
+            
+            // 测试不存在的路由
+            addResult('测试5: 不存在的路由', true, '测试404情况');
+            await testRoute('/api/not-exists', 'GET');
+            await testRoute(`/api/agents/${agentId}/not-exists`, 'GET');
+            
+            // 检查是否是特定ID的问题
+            addResult('测试6: 不同的ID', true, '测试其他ID');
+            await testRoute('/api/agents/test-id-123', 'GET');
+            await testRoute('/api/agents/test-id-123', 'PUT', { enabled: true });
+            
+            // 测试编码问题
+            addResult('测试7: URL编码', true, '测试特殊字符');
+            const specialId = 'test@id#123';
+            await testRoute(`/api/agents/${encodeURIComponent(specialId)}`, 'GET');
+            
+            // 检查控制台
+            addResult('测试完成', true, '请检查浏览器控制台和服务器日志获取更多信息');
+        }
+        
+        // 开始测试
+        runTests();
+    </script>
+</body>
+</html>

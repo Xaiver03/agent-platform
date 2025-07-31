@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import prisma from '../../../lib/prisma-simple'
 
 // 获取弹幕列表
 export async function GET(request: NextRequest) {

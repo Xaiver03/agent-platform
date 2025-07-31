@@ -1,17 +1,24 @@
 {
-  "buildCommand": "npm run build && npm run db:generate && npm run db:push",
-  "outputDirectory": ".next",
-  "installCommand": "npm install && npx prisma generate",
   "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "functions": {
     "app/api/**/*": {
       "maxDuration": 30
     }
   },
-  "rewrites": [
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "src": "/api/agents/([^/]+)",
+      "dest": "/api/agents/[id]"
+    },
+    {
+      "src": "/api/test-405/([^/]+)",
+      "dest": "/api/test-405/[id]"
+    },
+    {
+      "src": "/api/test-simple-dynamic/([^/]+)",
+      "dest": "/api/test-simple-dynamic/[testid]"
     }
   ]
 }

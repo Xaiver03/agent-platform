@@ -1,8 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import { getAdminFromToken } from '@/lib/auth'
+import prisma from '../../../../lib/prisma-simple'
+import { getAdminFromToken } from '../../../../lib/auth'
 
-const prisma = new PrismaClient()
+// GET单个反馈按钮
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const button = await prisma.feedbackButton.findUnique({
+      where: { id: params.id }
+    })
+
+    if (!button) {
+      return NextResponse.json(
+        { error: 'Button not found' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ button })
+  } catch (error) {
+    console.error('Failed to fetch feedback button:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch feedback button' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function PUT(
   request: NextRequest,

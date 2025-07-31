@@ -11,7 +11,14 @@ interface MarkdownRendererProps {
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className = '' }) => {
   return (
-    <div className={`markdown-content ${className}`}>
+    <div 
+      className={`markdown-content ${className}`}
+      style={{
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif',
+        lineHeight: '1.6',
+        color: '#333'
+      }}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
@@ -111,19 +118,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, className 
       >
         {content}
       </ReactMarkdown>
-      <style jsx global>{`
-        .markdown-content {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-          line-height: 1.6;
-          color: #333;
-        }
-        .markdown-content *:first-child {
-          margin-top: 0;
-        }
-        .markdown-content *:last-child {
-          margin-bottom: 0;
-        }
-      `}</style>
     </div>
   )
 }

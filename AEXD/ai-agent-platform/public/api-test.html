@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API路由测试</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            padding: 20px; 
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            background: #f5f5f5; 
+            border-radius: 5px; 
+        }
+        .result { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { 
+            margin: 5px; 
+            padding: 10px 15px; 
+            background: #007bff;
+            color: white;
+            border: none; 
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        pre { 
+            background: #e9ecef; 
+            padding: 10px; 
+            overflow-x: auto; 
+            font-size: 12px;
+        }
+        input { 
+            padding: 8px; 
+            margin: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px;
+        }
+        .header {
+            background: #343a40;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>API路由直接测试工具</h1>
+        <p>测试网站: <strong id="base-url"></strong></p>
+        <p>当前时间: <span id="current-time"></span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>基础路由测试</h2>
+        <button onclick="testBasicRoutes()">测试基础路由</button>
+        <button onclick="testDebugRoutes()">测试调试路由</button>
+        <div id="basic-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Agent ID测试</h2>
+        <label for="agent-id-input">Agent ID:</label>
+        <input type="text" id="agent-id-input" value="cmdr0bwyt000u5a69ndzjw4zr" style="width: 300px;">
+        <br>
+        <button onclick="testAgentRoutes()">测试Agent路由</button>
+        <button onclick="testPutMethods()">专门测试PUT方法</button>
+        <div id="agent-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>认证测试</h2>
+        <button onclick="checkAuth()">检查认证状态</button>
+        <button onclick="loginAdmin()">尝试登录</button>
+        <div id="auth-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>详细日志</h2>
+        <button onclick="clearLog()">清空日志</button>
+        <div id="detailed-log"></div>
+    </div>
+
+    <script>
+        // 设置基础URL和当前时间
+        document.getElementById('base-url').textContent = window.location.origin;
+        document.getElementById('current-time').textContent = new Date().toLocaleString();
+        
+        function addResult(containerId, title, success, details) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `result ${success ? 'success' : 'error'}`;
+            div.innerHTML = `
+                <strong>${title}</strong><br>
+                <small>${new Date().toLocaleTimeString()}</small><br>
+                ${details}
+            `;
+            container.insertBefore(div, container.firstChild);
+        }
+        
+        function addLog(message) {
+            const logDiv = document.getElementById('detailed-log');
+            const p = document.createElement('p');
+            p.innerHTML = `<small>${new Date().toLocaleTimeString()}</small>: ${message}`;
+            logDiv.insertBefore(p, logDiv.firstChild);
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('detailed-log').innerHTML = '';
+        }
+        
+        async function testAPI(path, method = 'GET', body = null, description = '') {
+            addLog(`开始测试: ${method} ${path} ${description}`);
+            
+            try {
+                const options = {
+                    method: method,
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    }
+                };
+                
+                if (body && ['PUT', 'POST', 'PATCH'].includes(method)) {
+                    options.headers['Content-Type'] = 'application/json';
+                    options.body = JSON.stringify(body);
+                }
+                
+                const startTime = Date.now();
+                const response = await fetch(path, options);
+                const endTime = Date.now();
+                
+                addLog(`${method} ${path} 响应: ${response.status} ${response.statusText} (${endTime - startTime}ms)`);
+                
+                let responseData;
+                const contentType = response.headers.get('content-type') || '';
+                
+                if (contentType.includes('application/json')) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+                
+                const details = `
+                    状态: ${response.status} ${response.statusText}<br>
+                    耗时: ${endTime - startTime}ms<br>
+                    Content-Type: ${contentType}<br>
+                    Allow: ${response.headers.get('Allow') || 'N/A'}<br>
+                    响应大小: ${JSON.stringify(responseData).length} 字符<br>
+                    <details>
+                        <summary>响应内容</summary>
+                        <pre>${typeof responseData === 'string' ? responseData : JSON.stringify(responseData, null, 2)}</pre>
+                    </details>
+                `;
+                
+                return { 
+                    success: response.ok, 
+                    status: response.status, 
+                    data: responseData, 
+                    details: details,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+                
+            } catch (error) {
+                addLog(`${method} ${path} 错误: ${error.message}`);
+                return { 
+                    success: false, 
+                    error: error.message,
+                    details: `网络错误: ${error.message}`
+                };
+            }
+        }
+        
+        async function testBasicRoutes() {
+            addResult('basic-results', '开始基础路由测试', true, '测试各种基础API路由');
+            
+            const routes = [
+                { path: '/api/simple-test', method: 'GET', desc: '最简单的GET测试' },
+                { path: '/api/simple-test', method: 'PUT', body: { test: true }, desc: '最简单的PUT测试' },
+                { path: '/api/simple-test', method: 'OPTIONS', desc: '最简单的OPTIONS测试' },
+                { path: '/api/agents', method: 'GET', desc: '获取Agent列表' },
+                { path: '/api/admin/agents', method: 'GET', desc: '获取管理后台Agent列表' },
+                { path: '/api/feedback-buttons', method: 'GET', desc: '获取反馈按钮' },
+                { path: '/api/health', method: 'GET', desc: '健康检查' }
+            ];
+            
+            for (const route of routes) {
+                const result = await testAPI(route.path, route.method, route.body || null, route.desc);
+                addResult('basic-results', `${route.method} ${route.path}`, result.success, result.details);
+                await new Promise(resolve => setTimeout(resolve, 200)); // 避免请求过快
+            }
+        }
+        
+        async function testDebugRoutes() {
+            const testId = 'test-debug-123';
+            const routes = [
+                { path: `/api/debug-put/${testId}`, method: 'GET', desc: '调试路由GET' },
+                { path: `/api/debug-put/${testId}`, method: 'PUT', body: { test: true }, desc: '调试路由PUT' },
+                { path: `/api/debug-put/${testId}`, method: 'OPTIONS', desc: '调试路由OPTIONS' },
+                { path: `/api/test-405/${testId}`, method: 'GET', desc: '405测试路由GET' },
+                { path: `/api/test-405/${testId}`, method: 'PUT', body: { test: true }, desc: '405测试路由PUT' }
+            ];
+            
+            for (const route of routes) {
+                const result = await testAPI(route.path, route.method, route.body, route.desc);
+                addResult('basic-results', `${route.method} ${route.path}`, result.success, result.details);
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+        }
+        
+        async function testAgentRoutes() {
+            const agentId = document.getElementById('agent-id-input').value;
+            if (!agentId) {
+                addResult('agent-results', '错误', false, '请输入Agent ID');
+                return;
+            }
+            
+            addResult('agent-results', `开始测试Agent ${agentId}`, true, '测试Agent相关路由');
+            
+            const routes = [
+                { path: `/api/agents/${agentId}`, method: 'GET', desc: '获取Agent详情' },
+                { path: `/api/agents/${agentId}`, method: 'OPTIONS', desc: 'Agent路由OPTIONS' },
+                { path: `/api/agents/${agentId}/click`, method: 'POST', desc: 'Agent点击' }
+            ];
+            
+            for (const route of routes) {
+                const result = await testAPI(route.path, route.method, route.body, route.desc);
+                addResult('agent-results', `${route.method} ${route.path}`, result.success, result.details);
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+        }
+        
+        async function testPutMethods() {
+            const agentId = document.getElementById('agent-id-input').value;
+            if (!agentId) {
+                addResult('agent-results', '错误', false, '请输入Agent ID');
+                return;
+            }
+            
+            addResult('agent-results', 'PUT方法专项测试', true, '专门测试PUT请求');
+            
+            const putTests = [
+                { 
+                    path: `/api/debug-put/${agentId}`, 
+                    body: { test: 'debug put', enabled: true }, 
+                    desc: '调试PUT路由' 
+                },
+                { 
+                    path: `/api/agents/${agentId}`, 
+                    body: { enabled: true }, 
+                    desc: '切换Agent可见性' 
+                },
+                { 
+                    path: `/api/agents/${agentId}`, 
+                    body: { 
+                        name: 'Test Update',
+                        description: 'Test Description',
+                        enabled: true 
+                    }, 
+                    desc: '完整Agent更新' 
+                }
+            ];
+            
+            for (const test of putTests) {
+                const result = await testAPI(test.path, 'PUT', test.body, test.desc);
+                addResult('agent-results', `PUT ${test.path}`, result.success, result.details);
+                
+                // 如果是405错误，额外记录
+                if (result.status === 405) {
+                    addLog(`⚠️ 405错误详情: ${test.path}, Allow header: ${result.headers?.allow || 'N/A'}`);
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        async function checkAuth() {
+            const result = await testAPI('/api/admin/login', 'GET', null, '检查认证状态');
+            addResult('auth-results', '认证状态检查', result.success, result.details);
+        }
+        
+        async function loginAdmin() {
+            const loginData = {
+                email: 'admin@example.com',
+                password: 'miracleplus666,.'
+            };
+            
+            const result = await testAPI('/api/admin/login', 'POST', loginData, '管理员登录');
+            addResult('auth-results', '管理员登录', result.success, result.details);
+        }
+        
+        // 页面加载时自动运行一些基础测试
+        window.onload = function() {
+            addLog('页面加载完成，开始初始化测试');
+            setTimeout(testBasicRoutes, 1000);
+        };
+    </script>
+</body>
+</html>

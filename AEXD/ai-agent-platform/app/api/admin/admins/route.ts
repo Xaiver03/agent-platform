@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import { getAdminFromToken } from '@/lib/auth'
-
-const prisma = new PrismaClient()
+import { getAdminFromToken } from '../../../../lib/auth'
+import prisma from '../../../../lib/prisma-simple'
 
 // 获取所有管理员列表
 export async function GET(request: NextRequest) {

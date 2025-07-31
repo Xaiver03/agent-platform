@@ -7,7 +7,10 @@
   "private": false,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run db:setup && next build",
+    "verify-components": "ls -la components/ | grep -E '(ImageUpload|MarkdownRenderer|RichTextEditor|FeedbackForm|SearchSuggestions)' || echo 'Component files check'",
+    "db:setup": "prisma generate && prisma db push && npx tsx prisma/create-prod-db.ts",
+    "vercel-build": "./vercel-build.sh",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -79,7 +82,8 @@
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^11.1.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "typescript": "^5"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.4.2",
@@ -93,7 +97,6 @@
     "prisma": "^5.14.0",
     "tailwindcss": "^3.4.1",
     "tsx": "^4.20.3",
-    "typescript": "^5",
     "wait-on": "^7.2.0"
   },
   "build": {

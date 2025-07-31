@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '../../../../lib/prisma-simple'
 
 // GET /api/admin/agents - 获取所有Agent（包括禁用的）- 管理员专用
 export async function GET(request: NextRequest) {

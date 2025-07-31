@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PUT方法测试</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        button { margin: 5px; padding: 10px; }
+        pre { background: #e9ecef; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>PUT方法专项测试</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="testOriginalRoute()">测试原始路由 /api/agents/[id]</button>
+    <button onclick="testDebugRoute()">测试调试路由 /api/debug-put/[id]</button>
+    <button onclick="testAllMethods()">测试所有HTTP方法</button>
+    <button onclick="clearResults()">清空结果</button>
+    
+    <script>
+        const testId = 'test-123-abc';
+        const resultsDiv = document.getElementById('results');
+        
+        function addResult(title, success, details) {
+            const div = document.createElement('div');
+            div.className = `test ${success ? 'success' : 'error'}`;
+            div.innerHTML = `
+                <strong>${title}</strong><br>
+                ${details}
+                <hr>
+            `;
+            resultsDiv.insertBefore(div, resultsDiv.firstChild);
+        }
+        
+        function clearResults() {
+            resultsDiv.innerHTML = '';
+        }
+        
+        async function testMethod(path, method, body = null) {
+            try {
+                console.log(`Testing ${method} ${path}`);
+                
+                const options = {
+                    method: method,
+                    credentials: 'include',
+                    headers: {}
+                };
+                
+                if (body && ['PUT', 'POST', 'PATCH'].includes(method)) {
+                    options.headers['Content-Type'] = 'application/json';
+                    options.body = JSON.stringify(body);
+                }
+                
+                const startTime = Date.now();
+                const response = await fetch(path, options);
+                const endTime = Date.now();
+                
+                const contentType = response.headers.get('content-type') || '';
+                let responseData;
+                
+                if (contentType.includes('application/json')) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+                
+                const details = `
+                    状态: ${response.status} ${response.statusText}<br>
+                    耗时: ${endTime - startTime}ms<br>
+                    Content-Type: ${contentType}<br>
+                    响应: <pre>${JSON.stringify(responseData, null, 2)}</pre>
+                `;
+                
+                addResult(`${method} ${path}`, response.ok, details);
+                return { ok: response.ok, status: response.status, data: responseData };
+                
+            } catch (error) {
+                addResult(
+                    `${method} ${path}`, 
+                    false, 
+                    `网络错误: ${error.message}`
+                );
+                return { ok: false, error: error.message };
+            }
+        }
+        
+        async function testOriginalRoute() {
+            const path = `/api/agents/${testId}`;
+            
+            // 先测试GET
+            await testMethod(path, 'GET');
+            
+            // 再测试PUT
+            await testMethod(path, 'PUT', {
+                name: 'Test Agent',
+                description: 'Test Description',
+                enabled: true
+            });
+        }
+        
+        async function testDebugRoute() {
+            const path = `/api/debug-put/${testId}`;
+            
+            // 测试所有方法
+            await testMethod(path, 'GET');
+            await testMethod(path, 'PUT', { test: 'data', enabled: true });
+            await testMethod(path, 'POST', { test: 'post data' });
+            await testMethod(path, 'DELETE');
+            await testMethod(path, 'OPTIONS');
+        }
+        
+        async function testAllMethods() {
+            addResult('开始全面测试', true, '测试各种路由和方法的组合');
+            
+            // 测试不同的路径
+            const paths = [
+                `/api/debug-put/${testId}`,
+                `/api/agents/${testId}`,
+                `/api/test-405/${testId}`
+            ];
+            
+            const methods = ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS'];
+            
+            for (const path of paths) {
+                for (const method of methods) {
+                    const body = ['PUT', 'POST'].includes(method) ? { test: true } : null;
+                    await testMethod(path, method, body);
+                    
+                    // 小延迟避免过于频繁的请求
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+            
+            addResult('测试完成', true, '所有测试已完成，请查看上方结果');
+        }
+        
+        // 页面加载时的说明
+        addResult('测试说明', true, `
+            这个页面用于测试PUT方法是否正常工作。<br>
+            测试ID: ${testId}<br>
+            1. 调试路由应该始终返回成功<br>
+            2. 原始路由可能需要认证<br>
+            3. 查看浏览器控制台获取更多信息
+        `);
+    </script>
+</body>
+</html>

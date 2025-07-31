@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import SearchSuggestions from '@/components/SearchSuggestions'
-import { LoadingSpinner } from '@/components/LoadingState'
-import { useDebounce } from '@/hooks/useDebounce'
+import { SearchSuggestions } from '../components/SearchSuggestions'
+import { LoadingSpinner } from '../components/LoadingState'
+import { useDebounce } from '../hooks/useDebounce'
 
-const GalaxyStarSystem = dynamic(() => import('@/components/GalaxyStarSystem').then(mod => ({ default: mod.default })), {
+const GalaxyStarSystem = dynamic(() => import('../components/GalaxyStarSystem').then(mod => ({ default: mod.default })), {
   loading: () => <div style={{ 
     minHeight: '100vh', 
     background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
@@ -18,12 +18,12 @@ const GalaxyStarSystem = dynamic(() => import('@/components/GalaxyStarSystem').t
   ssr: false
 })
 
-const FeedbackButtons = dynamic(() => import('@/components/FeedbackButtons').then(mod => ({ default: mod.FeedbackButtons })), {
+const FeedbackButtons = dynamic(() => import('../components/FeedbackButtons').then(mod => ({ default: mod.FeedbackButtons })), {
   loading: () => null,
   ssr: false
 })
 
-const Danmaku = dynamic(() => import('@/components/Danmaku').then(mod => ({ default: mod.Danmaku })), {
+const Danmaku = dynamic(() => import('../components/Danmaku').then(mod => ({ default: mod.Danmaku })), {
   loading: () => null,
   ssr: false
 })

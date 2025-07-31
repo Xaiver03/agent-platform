@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import prisma from '../../../../lib/prisma-simple'
 
 // GET /api/agents/tags - 获取热门标签和搜索建议
 export async function GET(request: NextRequest) {

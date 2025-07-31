@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>最小化405错误测试</title>
+</head>
+<body>
+    <h1>最小化405错误测试</h1>
+    <pre id="log"></pre>
+
+    <script>
+        const log = (msg) => {
+            document.getElementById('log').innerHTML += msg + '\n';
+            console.log(msg);
+        };
+
+        // 测试具体的agent ID
+        const agentId = 'cmdr0bwyt000u5a69ndzjw4zr';
+        
+        // 测试1: 直接测试URL是否正确
+        log('=== 测试1: URL格式检查 ===');
+        log(`Agent ID: ${agentId}`);
+        log(`URL: /api/agents/${agentId}`);
+        
+        // 测试2: 不同的HTTP方法
+        async function testMethods() {
+            log('\n=== 测试2: HTTP方法测试 ===');
+            
+            // GET请求
+            try {
+                log('\n尝试 GET 请求...');
+                const getResponse = await fetch(`/api/agents/${agentId}`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                log(`GET 响应: ${getResponse.status} ${getResponse.statusText}`);
+                if (!getResponse.ok) {
+                    const text = await getResponse.text();
+                    log(`GET 错误内容: ${text.substring(0, 200)}`);
+                }
+            } catch (e) {
+                log(`GET 错误: ${e.message}`);
+            }
+            
+            // OPTIONS请求
+            try {
+                log('\n尝试 OPTIONS 请求...');
+                const optionsResponse = await fetch(`/api/agents/${agentId}`, {
+                    method: 'OPTIONS',
+                    credentials: 'include'
+                });
+                log(`OPTIONS 响应: ${optionsResponse.status} ${optionsResponse.statusText}`);
+                const allowHeader = optionsResponse.headers.get('Allow');
+                log(`Allow header: ${allowHeader}`);
+            } catch (e) {
+                log(`OPTIONS 错误: ${e.message}`);
+            }
+            
+            // PUT请求（最小化）
+            try {
+                log('\n尝试 PUT 请求（最小化数据）...');
+                const putResponse = await fetch(`/api/agents/${agentId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ enabled: true })
+                });
+                log(`PUT 响应: ${putResponse.status} ${putResponse.statusText}`);
+                if (!putResponse.ok) {
+                    const text = await putResponse.text();
+                    log(`PUT 错误内容: ${text.substring(0, 200)}`);
+                }
+            } catch (e) {
+                log(`PUT 错误: ${e.message}`);
+            }
+        }
+        
+        // 测试3: 检查路由是否存在
+        async function checkRouteExists() {
+            log('\n=== 测试3: 路由存在性检查 ===');
+            
+            // 测试已知存在的路由
+            const testRoutes = [
+                '/api/agents',
+                '/api/admin/agents',
+                `/api/agents/${agentId}`,
+                `/api/agents/${agentId}/click`,
+                '/api/agents/static',
+                '/api/agents/tags'
+            ];
+            
+            for (const route of testRoutes) {
+                try {
+                    const response = await fetch(route, { 
+                        method: 'GET',
+                        credentials: 'include'
+                    });
+                    log(`${route}: ${response.status}`);
+                } catch (e) {
+                    log(`${route}: 错误 - ${e.message}`);
+                }
+            }
+        }
+        
+        // 测试4: 检查是否是路径编码问题
+        async function checkEncoding() {
+            log('\n=== 测试4: URL编码检查 ===');
+            
+            const encodedId = encodeURIComponent(agentId);
+            log(`原始ID: ${agentId}`);
+            log(`编码后ID: ${encodedId}`);
+            log(`是否相同: ${agentId === encodedId}`);
+            
+            if (agentId !== encodedId) {
+                try {
+                    const response = await fetch(`/api/agents/${encodedId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ enabled: true })
+                    });
+                    log(`使用编码ID的PUT响应: ${response.status}`);
+                } catch (e) {
+                    log(`编码ID错误: ${e.message}`);
+                }
+            }
+        }
+        
+        // 测试5: 检查请求头
+        async function checkHeaders() {
+            log('\n=== 测试5: 请求头检查 ===');
+            
+            const response = await fetch(`/api/agents/${agentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ enabled: true })
+            });
+            
+            log(`带完整headers的PUT响应: ${response.status}`);
+            
+            // 打印响应头
+            log('\n响应头:');
+            for (const [key, value] of response.headers.entries()) {
+                log(`${key}: ${value}`);
+            }
+        }
+        
+        // 运行所有测试
+        async function runAllTests() {
+            await testMethods();
+            await checkRouteExists();
+            await checkEncoding();
+            await checkHeaders();
+            
+            log('\n=== 测试完成 ===');
+        }
+        
+        runAllTests();
+    </script>
+</body>
+</html>

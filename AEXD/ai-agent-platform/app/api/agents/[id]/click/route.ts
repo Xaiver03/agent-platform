@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+import prisma from '../../../../../lib/prisma-simple'
 
 // POST /api/agents/[id]/click - 增加Agent点击次数
 export async function POST(

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { initializeApi } from '@/lib/api-init'
+import prisma from '../../../lib/prisma-simple'
+import { initializeApi } from '../../../lib/api-init'
+import { getAdminFromToken } from '../../../lib/auth'
 
 // 添加运行时配置
 export const runtime = 'nodejs'
@@ -196,8 +197,17 @@ export async function GET(request: NextRequest) {
 // POST /api/agents - 创建新Agent (管理员)
 export async function POST(request: NextRequest) {
   try {
+    // Check admin authentication
+    const admin = await getAdminFromToken(request)
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    
     const body = await request.json()
-    const { name, description, tags, manager, guideUrl, homepage, icon, themeColor } = body
+    const { name, description, tags, manager, guideUrl, homepage, icon, themeColor, coverImage, guideContent } = body
 
     // 基本验证
     if (!name?.trim() || !description?.trim() || !manager?.trim()) {
@@ -218,6 +228,8 @@ export async function POST(request: NextRequest) {
         guideUrl,
         homepage,
         icon,
+        coverImage,
+        guideContent,
         themeColor: themeColor || '#FFFFFF',
         enabled: true
       }

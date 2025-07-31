@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug 405 Error</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .success { border-color: #4caf50; background: #e8f5e9; }
+        .error { border-color: #f44336; background: #ffebee; }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover { background: #1976d2; }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug 405 Error for Agent API</h1>
+    
+    <div class="test-section">
+        <h2>Test Different HTTP Methods</h2>
+        <p>Agent ID: <input type="text" id="agentId" value="cmdr0bwyt000u5a69ndzjw4zr" style="width: 300px;"></p>
+        
+        <button onclick="testMethod('GET')">Test GET</button>
+        <button onclick="testMethod('PUT')">Test PUT</button>
+        <button onclick="testMethod('POST')">Test POST</button>
+        <button onclick="testMethod('DELETE')">Test DELETE</button>
+        <button onclick="testMethod('PATCH')">Test PATCH</button>
+        <button onclick="testMethod('OPTIONS')">Test OPTIONS</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Check Route Structure</h2>
+        <button onclick="checkRoutes()">Check All Agent Routes</button>
+        <div id="routes"></div>
+    </div>
+
+    <script>
+        async function testMethod(method) {
+            const agentId = document.getElementById('agentId').value;
+            const url = `/api/agents/${agentId}`;
+            const resultsDiv = document.getElementById('results');
+            
+            const testData = {
+                name: 'Test Agent',
+                description: 'Test Description',
+                guideContent: 'Test Guide Content'
+            };
+
+            try {
+                console.log(`Testing ${method} ${url}`);
+                
+                const options = {
+                    method: method,
+                    headers: {}
+                };
+
+                // Add body for methods that support it
+                if (['PUT', 'POST', 'PATCH'].includes(method)) {
+                    options.headers['Content-Type'] = 'application/json';
+                    options.body = JSON.stringify(testData);
+                }
+
+                const response = await fetch(url, options);
+                const responseText = await response.text();
+                
+                let responseData;
+                try {
+                    responseData = JSON.parse(responseText);
+                } catch (e) {
+                    responseData = responseText;
+                }
+
+                const resultHtml = `
+                    <div class="result ${response.ok ? 'success' : 'error'}">
+                        <strong>${method} ${url}</strong><br>
+                        Status: ${response.status} ${response.statusText}<br>
+                        Headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}<br>
+                        Response: <pre>${typeof responseData === 'string' ? responseData : JSON.stringify(responseData, null, 2)}</pre>
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = resultHtml + resultsDiv.innerHTML;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>${method} ${url}</strong><br>
+                        Error: ${error.message}
+                    </div>
+                ` + resultsDiv.innerHTML;
+            }
+        }
+
+        async function checkRoutes() {
+            const routesDiv = document.getElementById('routes');
+            const routes = [
+                '/api/agents',
+                '/api/agents/static',
+                '/api/agents/tags',
+                '/api/agents/legacy',
+                '/api/admin/agents',
+                `/api/agents/${document.getElementById('agentId').value}`,
+                `/api/agents/${document.getElementById('agentId').value}/click`
+            ];
+
+            let html = '<h3>Testing all agent-related routes:</h3>';
+            
+            for (const route of routes) {
+                try {
+                    const response = await fetch(route, { method: 'GET' });
+                    html += `
+                        <div class="result ${response.ok ? 'success' : 'error'}">
+                            GET ${route}: ${response.status} ${response.statusText}
+                        </div>
+                    `;
+                } catch (error) {
+                    html += `
+                        <div class="result error">
+                            GET ${route}: Error - ${error.message}
+                        </div>
+                    `;
+                }
+            }
+            
+            routesDiv.innerHTML = html;
+        }
+
+        // Also log any network errors
+        window.addEventListener('unhandledrejection', event => {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
+
+        // Test on load
+        window.onload = () => {
+            console.log('Debug page loaded. Testing routes...');
+        };
+    </script>
+</body>
+</html>

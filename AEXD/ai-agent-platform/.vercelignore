@@ -1,0 +1,64 @@
+# Development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs (but not .next for Vercel)
+out
+build
+dist
+
+# Dependencies
+node_modules
+
+# Database (dev)
+prisma/dev.db
+prisma/dev.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Test files
+test-db.js
+coverage
+.nyc_output
+
+# Documentation
+README-temp.md
+README-Docker.md
+VERCEL-DATABASE-FIX.md
+VERCEL-DEPLOY-CHECK.md
+
+# Scripts
+启动AI体验台.*
+
+# Git
+.git
+.gitignore
+
+# Temporary files
+*.tmp
+temp/
+.cache/
+
+# Build cache - force rebuild
+.vercel

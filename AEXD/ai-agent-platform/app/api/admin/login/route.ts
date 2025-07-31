@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { generateAdminToken } from '@/lib/auth'
-import prisma from '@/lib/prisma'
-import { COOKIE_NAME, getCookieConfig } from '@/lib/cookie-config'
+import { generateAdminToken } from '../../../../lib/auth'
+import prisma from '../../../../lib/prisma-simple'
+import { COOKIE_NAME, getCookieConfig } from '../../../../lib/cookie-config'
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,7 +69,7 @@ export async function DELETE() {
 
 export async function GET(request: NextRequest) {
   try {
-    const { getAdminFromToken } = await import('@/lib/auth')
+    const { getAdminFromToken } = await import('../../../../lib/auth')
     const admin = await getAdminFromToken(request)
     
     if (admin) {

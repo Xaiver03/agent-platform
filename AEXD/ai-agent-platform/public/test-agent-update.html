@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试Agent更新功能</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { margin: 5px; padding: 10px 15px; }
+        pre { background: #e0e0e0; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>测试Agent更新功能</h1>
+    
+    <div class="section">
+        <h2>1. 获取第一个Agent</h2>
+        <button onclick="getFirstAgent()">获取Agent</button>
+        <div id="agent-info"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. 测试更新Agent</h2>
+        <button onclick="testUpdate()">测试PUT更新</button>
+        <button onclick="testUpdateMinimal()">最小化PUT测试</button>
+        <button onclick="testUpdateWithAuth()">带认证的PUT测试</button>
+        <div id="update-result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. 直接测试问题ID</h2>
+        <button onclick="testProblemId()">测试 cmdr0bwyt000u5a69ndzjw4zr</button>
+        <div id="problem-result"></div>
+    </div>
+    
+    <script>
+        let currentAgent = null;
+        
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const p = document.createElement('p');
+            p.className = isError ? 'error' : 'success';
+            p.innerHTML = message;
+            element.appendChild(p);
+        }
+        
+        async function getFirstAgent() {
+            try {
+                const response = await fetch('/api/admin/agents', {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to get agents: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.agents && data.agents.length > 0) {
+                    currentAgent = data.agents[0];
+                    log('agent-info', `获取到Agent: ${currentAgent.name} (ID: ${currentAgent.id})`);
+                    log('agent-info', `<pre>${JSON.stringify(currentAgent, null, 2)}</pre>`);
+                } else {
+                    log('agent-info', '没有找到Agent', true);
+                }
+            } catch (error) {
+                log('agent-info', `错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testUpdate() {
+            if (!currentAgent) {
+                log('update-result', '请先获取一个Agent', true);
+                return;
+            }
+            
+            const updateData = {
+                name: currentAgent.name,
+                description: currentAgent.description + ' (已更新)',
+                tags: currentAgent.tags,
+                manager: currentAgent.manager,
+                enabled: currentAgent.enabled
+            };
+            
+            try {
+                console.log('Sending PUT request to:', `/api/agents/${currentAgent.id}`);
+                console.log('Update data:', updateData);
+                
+                const response = await fetch(`/api/agents/${currentAgent.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(updateData)
+                });
+                
+                log('update-result', `响应状态: ${response.status} ${response.statusText}`);
+                
+                const responseText = await response.text();
+                console.log('Response:', responseText);
+                
+                if (response.ok) {
+                    const data = JSON.parse(responseText);
+                    log('update-result', `更新成功: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+                } else {
+                    log('update-result', `更新失败: ${responseText}`, true);
+                }
+            } catch (error) {
+                log('update-result', `错误: ${error.message}`, true);
+                console.error('Error:', error);
+            }
+        }
+        
+        async function testUpdateMinimal() {
+            if (!currentAgent) {
+                log('update-result', '请先获取一个Agent', true);
+                return;
+            }
+            
+            try {
+                // 只发送enabled字段，模拟切换可见性
+                const response = await fetch(`/api/agents/${currentAgent.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ enabled: !currentAgent.enabled })
+                });
+                
+                log('update-result', `最小化测试响应: ${response.status} ${response.statusText}`);
+                
+                if (!response.ok) {
+                    const text = await response.text();
+                    log('update-result', `错误内容: ${text}`, true);
+                }
+            } catch (error) {
+                log('update-result', `最小化测试错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testUpdateWithAuth() {
+            // 先检查是否已登录
+            try {
+                const authResponse = await fetch('/api/admin/login', {
+                    credentials: 'include'
+                });
+                
+                const authData = await authResponse.json();
+                log('update-result', `认证状态: ${authData.isAuthenticated ? '已登录' : '未登录'}`);
+                
+                if (!authData.isAuthenticated) {
+                    log('update-result', '请先登录管理员账号', true);
+                    return;
+                }
+                
+                await testUpdate();
+            } catch (error) {
+                log('update-result', `认证检查错误: ${error.message}`, true);
+            }
+        }
+        
+        async function testProblemId() {
+            const problemId = 'cmdr0bwyt000u5a69ndzjw4zr';
+            
+            try {
+                // 先GET测试
+                const getResponse = await fetch(`/api/agents/${problemId}`, {
+                    credentials: 'include'
+                });
+                
+                log('problem-result', `GET ${problemId}: ${getResponse.status}`);
+                
+                if (getResponse.ok) {
+                    const agent = await getResponse.json();
+                    log('problem-result', `Agent存在: ${agent.agent.name}`);
+                    
+                    // 再PUT测试
+                    const putResponse = await fetch(`/api/agents/${problemId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ enabled: true })
+                    });
+                    
+                    log('problem-result', `PUT ${problemId}: ${putResponse.status} ${putResponse.statusText}`);
+                    
+                    if (!putResponse.ok) {
+                        const errorText = await putResponse.text();
+                        log('problem-result', `PUT错误: ${errorText}`, true);
+                    }
+                } else {
+                    log('problem-result', `Agent不存在: ${getResponse.status}`, true);
+                }
+            } catch (error) {
+                log('problem-result', `测试错误: ${error.message}`, true);
+            }
+        }
+        
+        // 页面加载时自动获取第一个Agent
+        window.onload = () => {
+            console.log('测试页面已加载');
+            getFirstAgent();
+        };
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { useDebounce } from '@/hooks/useDebounce'
+import { useDebounce } from '../hooks/useDebounce'
 
 interface SearchSuggestionsProps {
   value: string
@@ -249,4 +249,3 @@ export const SearchSuggestions: React.FC<SearchSuggestionsProps> = ({
   )
 }
 
-export default SearchSuggestions
