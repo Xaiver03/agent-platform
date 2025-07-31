@@ -33,9 +33,11 @@ npm run setup:github          # Setup GitHub Actions
 
 **IMPORTANT: Always auto-commit and push after every fix or change**
 - After fixing any bug or making improvements, immediately commit with descriptive message
-- Always push to remote repository after committing
+- **ALWAYS push to remote repository after committing** - This is mandatory for all changes
 - Use consistent commit message format: "fix: [description]" or "feat: [description]"
 - Include the Claude Code signature in commit messages
+- Every single update, no matter how small, must be pushed to ensure deployment continuity
+- Use `git push origin main` after every commit to sync with remote repository
 
 ## Architecture Overview
 
