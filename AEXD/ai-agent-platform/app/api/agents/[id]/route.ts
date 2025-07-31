@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '../../../../lib/prisma-simple'
 import { getAdminFromToken } from '../../../../lib/auth'
-import { initializeApi } from '../../../../lib/api-init'
-
-// 添加运行时配置
-export const runtime = 'nodejs'
-
-// 使用传统的参数格式，确保兼容性
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('[GET] Agent ID:', params.id);
-    
-    // Initialize API (for Vercel)
-    await initializeApi();
-    
     const agent = await prisma.agent.findUnique({
       where: { id: params.id },
       include: {
@@ -55,16 +44,10 @@ export async function PUT(
 ) {
   try {
     console.log('[PUT] Agent ID:', params.id);
-    console.log('[PUT] Request method:', request.method);
-    console.log('[PUT] Request URL:', request.url);
-    
-    // Initialize API (for Vercel)
-    await initializeApi();
     
     // Check admin authentication
     const admin = await getAdminFromToken(request)
     if (!admin) {
-      console.log('[PUT] Unauthorized: No admin token found')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -104,6 +87,7 @@ export async function PUT(
 
     console.log('[PUT] Update data:', updateData)
 
+    // 实际更新数据库
     const agent = await prisma.agent.update({
       where: { id: params.id },
       data: updateData
@@ -125,11 +109,6 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log('[DELETE] Agent ID:', params.id);
-    
-    // Initialize API (for Vercel)
-    await initializeApi();
-    
     // Check admin authentication
     const admin = await getAdminFromToken(request)
     if (!admin) {
@@ -153,18 +132,13 @@ export async function DELETE(
   }
 }
 
-export async function OPTIONS(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  console.log('[OPTIONS] Called for agent:', params.id);
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
       'Allow': 'GET, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Origin': '*',
     },
   })
 }
