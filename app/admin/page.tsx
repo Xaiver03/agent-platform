@@ -146,26 +146,45 @@ export default function AdminDashboard() {
 
   const handleSubmit = async (values: any) => {
     try {
+      console.log('[Admin] Starting submit - values:', values)
+      console.log('[Admin] Editing agent:', editingAgent)
+      
       const url = editingAgent ? `/api/agents/${editingAgent.id}` : '/api/agents'
       const method = editingAgent ? 'PUT' : 'POST'
+      
+      console.log('[Admin] Request URL:', url)
+      console.log('[Admin] Request method:', method)
+      console.log('[Admin] Request body:', JSON.stringify(values))
 
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // 确保包含cookies
         body: JSON.stringify(values),
       })
 
-      if (!response.ok) throw new Error('操作失败')
+      console.log('[Admin] Response status:', response.status)
+      const responseData = await response.json()
+      console.log('[Admin] Response data:', responseData)
+
+      if (!response.ok) {
+        throw new Error(responseData.error || `操作失败 (${response.status})`)
+      }
 
       message.success(editingAgent ? '更新成功' : '创建成功')
       setModalVisible(false)
       form.resetFields()
       setEditingAgent(null)
-      fetchData()
+      
+      // 立即刷新数据
+      console.log('[Admin] Fetching updated data...')
+      await fetchData()
+      console.log('[Admin] Data refresh complete')
     } catch (error) {
-      message.error('操作失败')
+      console.error('[Admin] Submit error:', error)
+      message.error(error instanceof Error ? error.message : '操作失败')
     }
   }
 

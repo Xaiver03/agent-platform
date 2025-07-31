@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
+import { getAdminFromToken } from '@/lib/auth'
 
 const prisma = new PrismaClient()
 
@@ -46,8 +47,23 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('[PUT] Started - Agent ID:', params.id)
+    console.log('[PUT] Headers:', Object.fromEntries(request.headers.entries()))
+    
+    // 验证管理员权限
+    const admin = await getAdminFromToken(request)
+    console.log('[PUT] Admin auth result:', admin ? 'Authenticated' : 'Not authenticated')
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    
     const body = await request.json()
-    const { name, description, tags, manager, guideUrl, homepage, icon, enabled, themeColor } = body
+    console.log('[PUT] Request body:', JSON.stringify(body, null, 2))
+    
+    const { name, description, tags, manager, guideUrl, homepage, icon, enabled, themeColor, coverImage, guideContent } = body
 
     // 构建更新数据，只包含提供的字段
     const updateData: any = {}
@@ -60,17 +76,46 @@ export async function PUT(
     if (icon !== undefined) updateData.icon = icon
     if (enabled !== undefined) updateData.enabled = enabled
     if (themeColor !== undefined) updateData.themeColor = themeColor
+    if (coverImage !== undefined) updateData.coverImage = coverImage
+    if (guideContent !== undefined) updateData.guideContent = guideContent
+    
+    console.log('[PUT] Update data to be applied:', JSON.stringify(updateData, null, 2))
 
+    // 先查询原始数据
+    const originalAgent = await prisma.agent.findUnique({
+      where: { id: params.id }
+    })
+    console.log('[PUT] Original agent data:', JSON.stringify(originalAgent, null, 2))
+    
+    if (!originalAgent) {
+      console.log('[PUT] Agent not found')
+      return NextResponse.json(
+        { error: 'Agent not found' },
+        { status: 404 }
+      )
+    }
+    
+    // 执行更新
+    console.log('[PUT] Executing database update...')
     const agent = await prisma.agent.update({
       where: { id: params.id },
       data: updateData
     })
+    console.log('[PUT] Updated agent data:', JSON.stringify(agent, null, 2))
+    
+    // 验证更新是否成功
+    const verifyAgent = await prisma.agent.findUnique({
+      where: { id: params.id }
+    })
+    console.log('[PUT] Verification query result:', JSON.stringify(verifyAgent, null, 2))
+    console.log('[PUT] Update successful')
 
-    return NextResponse.json({ agent })
+    return NextResponse.json({ agent: verifyAgent })
   } catch (error) {
-    console.error('Error updating agent:', error)
+    console.error('[PUT] Error updating agent:', error)
+    console.error('[PUT] Error stack:', error instanceof Error ? error.stack : 'No stack')
     return NextResponse.json(
-      { error: 'Failed to update agent' },
+      { error: 'Failed to update agent', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
@@ -82,6 +127,15 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // 验证管理员权限
+    const admin = await getAdminFromToken(request)
+    if (!admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+    
     await prisma.agent.delete({
       where: { id: params.id }
     })
@@ -94,4 +148,16 @@ export async function DELETE(
       { status: 500 }
     )
   }
+}
+
+// OPTIONS - 处理CORS预检请求
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Allow': 'GET, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  })
 }
